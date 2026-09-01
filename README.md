@@ -22,6 +22,4 @@ El sistema centraliza la gestión de unidades, conductores, contratos y hojas de
 | **Octavio García** | Gestión & Desarrollo de Base de Datos | [@octavioleogarcia-png](https://github.com/octavioleogarcia-png) |
 | **Santiago Manrique** | Diseño de Interfaz & Lógica de Negocio | [@Santiago-Manrique](https://github.com/Santiago-Manrique) |
 
-*Nota: La asignación de roles y el equipo se ampliarán conforme avance el desarrollo del proyecto.*
-
 ---
