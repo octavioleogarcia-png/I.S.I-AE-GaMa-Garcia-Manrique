@@ -25,18 +25,3 @@ El sistema centraliza la gestión de unidades, conductores, contratos y hojas de
 *Nota: La asignación de roles y el equipo se ampliarán conforme avance el desarrollo del proyecto.*
 
 ---
-
-## Enlaces de Gestión
-
-* **Tablero de Seguimiento (Kanban):** `[Enlace a GitHub Projects]`
-* **Documentación y Cátedra:** `[Enlace al Moodle / Campus]`
-
----
-
-## Estructura del Repositorio
-
-* `docs/`: Documentación académica, requerimientos, especificaciones y registros de avance.
-* `design/`: Diagramas Entidad-Relación (DER), modelo relacional y prototipos de interfaz de usuario.
-* `src/`: Código fuente del sistema (lógica de programación, controladores y vistas).
-* `database/`: Scripts de creación de esquemas (DDL), inserción de datos de prueba (DML) y consultas.
-* `tests/`: Casos de prueba, validaciones y datos de prueba unitarios.
