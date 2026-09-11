@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Título dinámico (se actualiza con el nombre del producto) -->
   <title id="titulo-pestana">Ficha de unidad · GaMa</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Encabezado con navegación -->
   <header class="encabezado">
     <div class="contenedor">
       <a href="index.html" class="marca">
@@ -23,12 +25,15 @@
     </div>
   </header>
 
+  <!-- Sección principal: ficha detallada del producto -->
   <section class="seccion">
+    <!-- Contenedor que se rellena dinámicamente con JavaScript -->
     <div class="contenedor" id="contenedor-ficha">
       <!-- Contenido generado por script a partir de data.js y ?id= en la URL -->
     </div>
   </section>
 
+  <!-- Pie de página -->
   <footer class="pie-pagina">
     <div class="contenedor">
       <span>GaMa — Transporte de material de construcción</span>
@@ -36,14 +41,21 @@
     </div>
   </footer>
 
+  <!-- Cargar datos del catálogo -->
   <script src="data.js"></script>
+  <!-- Script para generar ficha del producto dinámicamente -->
   <script>
+    // Obtener parámetros de la URL (ej: ?id=volcador-chico)
     const parametros = new URLSearchParams(window.location.search);
+    // Extraer valor del parámetro "id"
     const idPedido = parametros.get("id");
+    // Buscar producto en el catálogo; si no existe, usar el primero como fallback
     const producto = buscarProducto(idPedido) || PRODUCTOS[0];
 
+    // Actualizar título de la pestaña del navegador
     document.getElementById("titulo-pestana").textContent = producto.nombre + " · GaMa";
 
+    // Renderizar ficha del producto (panel visual + panel de datos)
     document.getElementById("contenedor-ficha").innerHTML = `
       <div class="ficha">
         <div class="panel-visual">

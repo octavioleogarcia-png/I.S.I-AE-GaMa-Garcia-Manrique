@@ -1,18 +1,29 @@
-/* GaMa — catálogo de unidades y servicios
+/* GaMa — Catálogo de unidades y servicios
    Un único array fuente de verdad, consumido por listado_tabla.html,
    listado_box.html, producto.html y comprar.html. */
 
+// Array principal con todos los productos/servicios de GaMa
 const PRODUCTOS = [
   {
+    // Identificador único (usado en URLs y búsquedas)
     id: "volcador-chico",
+    // Nombre mostrado al usuario
     nombre: "Volcador Chico 5 m³",
+    // Tipo/categoría del producto
     categoria: "Volcador",
+    // Capacidad de carga en volumen
     capacidad: "5 m³",
+    // Carga máxima permitida en peso
     cargaMaxima: "6.500 kg",
+    // Descripción breve del uso
     uso: "Escombros y áridos en obras urbanas, calles angostas",
+    // Precio de referencia en pesos argentinos
     precio: 45000,
+    // Unidad de tarifa (por viaje, por km, por jornada, etc.)
     unidad: "por viaje (hasta 15 km)",
+    // Ruta al ícono SVG
     icono: "img/dumptruck-small.svg",
+    // Descripción completa del producto
     descripcion:
       "La unidad más ágil de la flota. Entra donde un camión grande no puede: obras en construcción dentro de la ciudad, retiro de escombros de demoliciones chicas y entregas de arena o piedra en cantidades acotadas. Ideal cuando el acceso a la obra es reducido.",
   },
@@ -83,8 +94,14 @@ const PRODUCTOS = [
   },
 ];
 
-// Devuelve el precio formateado en pesos argentinos
+// Función: formatea un número como moneda en pesos argentinos
+// Parámetro: valor (número)
+// Retorna: string con formato "$ XXX.XXX" (sin decimales) o "$ 0" si es inválido
 function formatearPrecio(valor) {
+  // Validar que sea un número válido
+  if (typeof valor !== "number" || isNaN(valor) || valor < 0) {
+    return "$ 0";
+  }
   return valor.toLocaleString("es-AR", {
     style: "currency",
     currency: "ARS",
@@ -92,7 +109,9 @@ function formatearPrecio(valor) {
   });
 }
 
-// Busca un producto por id
+// Función: busca un producto por su id
+// Parámetro: id (string)
+// Retorna: objeto del producto encontrado, o undefined si no existe
 function buscarProducto(id) {
   return PRODUCTOS.find((p) => p.id === id);
 }
