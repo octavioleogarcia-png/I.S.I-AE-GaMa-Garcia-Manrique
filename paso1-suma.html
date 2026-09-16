@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parte A · Suma en memoria · GaMa</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* Estilos puntuales de este ejercicio: no forman parte del sitio GaMa,
+       solo reutilizan la paleta y tipografías ya definidas en style.css. */
+    .demo {
+      max-width: 460px;
+      margin: 60px auto;
+      background: #fff;
+      border: 1px solid var(--concrete-3);
+      padding: 32px 36px;
+    }
+    .demo h1 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      margin: 0 0 6px;
+    }
+    .demo p.intro {
+      color: #6b6656;
+      font-size: 0.92rem;
+      margin: 0 0 24px;
+    }
+    .demo .campo-num {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .demo label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .demo input[type="number"] {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      padding: 10px 12px;
+      border: 1px solid var(--concrete-3);
+      border-radius: 2px;
+    }
+    .demo input[type="number"]:focus {
+      border-color: var(--steel);
+      outline: none;
+    }
+    .demo button {
+      margin-top: 8px;
+      width: 100%;
+    }
+    .demo #resultado {
+      display: block;
+      margin-top: 22px;
+      padding: 14px 16px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.05rem;
+      text-align: center;
+      background: var(--concrete-2);
+      border-left: 4px solid var(--concrete-3);
+    }
+    .demo #resultado.es-positivo { border-left-color: var(--steel); color: var(--steel); }
+    .demo #resultado.es-negativo { border-left-color: var(--rust); color: var(--rust); }
+    .demo #resultado.es-cero     { border-left-color: var(--yellow-dim); color: var(--yellow-dim); }
+  </style>
+</head>
+<body>
+
+  <div class="demo">
+    <h1>Parte A — Sumatoria en memoria</h1>
+    <p class="intro">
+      Cargá dos valores numéricos. El script los suma en una variable de
+      JavaScript (RAM del navegador) y escribe el resultado en pantalla,
+      sin recargar la página.
+    </p>
+
+    <div class="campo-num">
+      <label for="valor-a">Valor A</label>
+      <input type="number" id="valor-a" placeholder="Ej: 10" />
+    </div>
+
+    <div class="campo-num">
+      <label for="valor-b">Valor B</label>
+      <input type="number" id="valor-b" placeholder="Ej: -4" />
+    </div>
+
+    <button type="button" id="boton-calcular" class="boton boton-primario">
+      Calcular
+    </button>
+
+    <span id="resultado">Cargá los dos valores y presioná "Calcular".</span>
+  </div>
+
+  <script>
+    /* ------------------------------------------------------------------
+       Parte A — Algorítmica paso a paso
+       1) Capturar dos valores numéricos desde los <input type="number">.
+       2) Calcular la sumatoria en una variable en memoria (no en el DOM).
+       3) Inyectar el resultado en el <span id="resultado">, indicando si
+          el total es positivo, cero o negativo.
+       ------------------------------------------------------------------ */
+
+    // Paso 0: referencias a los nodos del DOM que vamos a leer y a mutar.
+    const inputValorA = document.getElementById("valor-a");
+    const inputValorB = document.getElementById("valor-b");
+    const botonCalcular = document.getElementById("boton-calcular");
+    const spanResultado = document.getElementById("resultado");
+
+    function calcularSuma() {
+      // Paso 1: leer los valores de entrada. Los <input> siempre devuelven
+      // texto (string), por eso se convierten a número con Number().
+      // Si el campo está vacío, se toma como 0 para no romper la suma.
+      const valorA = Number(inputValorA.value) || 0;
+      const valorB = Number(inputValorB.value) || 0;
+
+      // Paso 2: la sumatoria vive solo en esta variable, en memoria RAM,
+      // hasta que decidimos mostrarla.
+      const total = valorA + valorB;
+
+      // Paso 3: mutar el DOM según el signo del resultado, sin recargar
+      // la pestaña del navegador.
+      spanResultado.classList.remove("es-positivo", "es-negativo", "es-cero");
+
+      if (total > 0) {
+        spanResultado.textContent = `Total: ${total} (positivo)`;
+        spanResultado.classList.add("es-positivo");
+      } else if (total < 0) {
+        spanResultado.textContent = `Total: ${total} (negativo)`;
+        spanResultado.classList.add("es-negativo");
+      } else {
+        spanResultado.textContent = `Total: ${total} (cero)`;
+        spanResultado.classList.add("es-cero");
+      }
+    }
+
+    // Captura del evento de usuario: click en el botón.
+    botonCalcular.addEventListener("click", calcularSuma);
+  </script>
+
+</body>
+</html>
