@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Actividad 2 · Catálogo asíncrono · GaMa</title>
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <style>
+    /* Estilos puntuales de esta actividad: la grilla y las tarjetas
+       (.grilla-box / .box-producto) ya existen en style.css y se
+       reutilizan tal cual; esto solo da margen a la sección. */
+    .seccion-actividad {
+      padding: 48px 24px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .seccion-actividad h1 {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      margin: 0 0 8px;
+    }
+    .seccion-actividad p.intro {
+      color: #6b6656;
+      margin: 0 0 32px;
+      max-width: 60ch;
+    }
+    #estado-carga {
+      font-family: var(--font-body);
+      color: var(--steel);
+      font-weight: 600;
+      padding: 20px 0;
+    }
+    #estado-carga.es-error {
+      color: var(--rust);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="../../index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="seccion-actividad">
+    <h1>Actividad 2 — Catálogo cargado en segundo plano</h1>
+    <p class="intro">
+      Los productos de esta página no están escritos en el HTML: se piden
+      con <code>fetch</code> a <code>productos.json</code> recién cuando la
+      ventana termina de cargar, y se dibujan en pantalla como tarjetas.
+    </p>
+
+    <!-- Mensaje de estado mientras se resuelve el fetch (o si falla) -->
+    <p id="estado-carga">Cargando catálogo…</p>
+
+    <!-- Contenedor donde se inyectan las tarjetas -->
+    <div class="grilla-box" id="grilla-productos"></div>
+  </section>
+
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Actividad 2 · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <script>
+    /* ------------------------------------------------------------------
+       Actividad 2 — fetch + async/await + JSON + querySelector + eventos
+       ------------------------------------------------------------------
+       1) El catálogo (productos.json) se pide recién cuando la página
+          termina de cargar por completo (evento "load"), no antes.
+       2) fetch() hace el pedido en segundo plano, sin trabar el resto
+          de la página mientras responde.
+       3) Cada producto se dibuja como una tarjeta reutilizando el
+          mismo estilo visual (.box-producto) que ya usa el sitio.
+       ------------------------------------------------------------------ */
+
+    // Referencias a los nodos que vamos a leer y a mutar, obtenidas con
+    // querySelector / getElementById.
+    const grilla = document.querySelector("#grilla-productos");
+    const estadoCarga = document.querySelector("#estado-carga");
+
+    // Función que arma el HTML de una tarjeta a partir de un producto.
+    function crearTarjeta(producto) {
+      const tarjeta = document.createElement("article");
+      tarjeta.className = "box-producto";
+      tarjeta.innerHTML = `
+        <div class="visor">
+          <img src="${producto.icono}" alt="" />
+        </div>
+        <div class="cuerpo">
+          <span class="categoria">${producto.categoria}</span>
+          <h3>${producto.nombre}</h3>
+          <p class="uso">${producto.uso}</p>
+          <div class="pie">
+            <span class="precio">
+              ${formatearPrecio(producto.precio)}
+              <small>${producto.unidad}</small>
+            </span>
+          </div>
+        </div>
+      `;
+      return tarjeta;
+    }
+
+    // Formatea un número como moneda en pesos argentinos (misma lógica
+    // que data.js, repetida acá porque esta página no depende de él:
+    // toda su información sale del fetch, no de un array ya cargado).
+    function formatearPrecio(valor) {
+      if (typeof valor !== "number" || isNaN(valor) || valor < 0) return "$ 0";
+      return valor.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        maximumFractionDigits: 0,
+      });
+    }
+
+    // Función asíncrona: pide el JSON con fetch y, cuando llega,
+    // dibuja una tarjeta por cada producto.
+    async function cargarCatalogo() {
+      try {
+        // await pausa esta función (no la página entera) hasta que
+        // el pedido de red se resuelva.
+        const respuesta = await fetch("productos.json");
+
+        // fetch no rechaza la promesa ante un 404: hay que chequear
+        // "ok" a mano y cortar acá si el archivo no se encontró.
+        if (!respuesta.ok) {
+          throw new Error(`No se pudo cargar productos.json (HTTP ${respuesta.status})`);
+        }
+
+        // Convierte el cuerpo de la respuesta (texto) en un array de JS.
+        const productos = await respuesta.json();
+
+        // Ya no hace falta el mensaje de "Cargando…".
+        estadoCarga.remove();
+
+        // Por cada producto del JSON, crea su tarjeta y la agrega a la grilla.
+        productos.forEach((producto) => {
+          grilla.appendChild(crearTarjeta(producto));
+        });
+      } catch (error) {
+        // Si falla la red o el JSON viene mal formado, se avisa en
+        // pantalla en vez de dejar la página en blanco.
+        estadoCarga.textContent = "No se pudo cargar el catálogo: " + error.message;
+        estadoCarga.classList.add("es-error");
+        console.error(error);
+      }
+    }
+
+    // Captura del evento "load": recién cuando termina de cargar TODA
+    // la ventana (HTML, CSS, imágenes) se dispara el fetch del catálogo.
+    window.addEventListener("load", cargarCatalogo);
+  </script>
+
+</body>
+</html>

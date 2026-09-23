@@ -1,0 +1,68 @@
+[
+  {
+    "id": "volcador-chico",
+    "nombre": "Volcador Chico 5 m³",
+    "categoria": "Volcador",
+    "capacidad": "5 m³",
+    "cargaMaxima": "6.500 kg",
+    "uso": "Escombros y áridos en obras urbanas, calles angostas",
+    "precio": 45000,
+    "unidad": "por viaje (hasta 15 km)",
+    "icono": "../../assets/img/dumptruck-small.svg"
+  },
+  {
+    "id": "volcador-grande",
+    "nombre": "Volcador Grande 12 m³",
+    "categoria": "Volcador",
+    "capacidad": "12 m³",
+    "cargaMaxima": "14.000 kg",
+    "uso": "Movimiento de tierra en obras de mayor escala",
+    "precio": 78000,
+    "unidad": "por viaje (hasta 15 km)",
+    "icono": "../../assets/img/dumptruck-large.svg"
+  },
+  {
+    "id": "acoplado",
+    "nombre": "Camión con Acoplado",
+    "categoria": "Transporte pesado",
+    "capacidad": "20 m³ combinados",
+    "cargaMaxima": "22.000 kg",
+    "uso": "Traslados de larga distancia entre obras o depósitos",
+    "precio": 15000,
+    "unidad": "por km recorrido",
+    "icono": "../../assets/img/trailer.svg"
+  },
+  {
+    "id": "semi-banadera",
+    "nombre": "Semirremolque Bañadera",
+    "categoria": "Transporte pesado",
+    "capacidad": "30 m³",
+    "cargaMaxima": "30.000 kg",
+    "uso": "Áridos a granel para grandes volúmenes",
+    "precio": 18500,
+    "unidad": "por km recorrido",
+    "icono": "../../assets/img/tanker-trailer.svg"
+  },
+  {
+    "id": "mixer",
+    "nombre": "Mixer Hormigonero",
+    "categoria": "Servicio especial",
+    "capacidad": "6 m³",
+    "cargaMaxima": "12.000 kg",
+    "uso": "Entrega de hormigón elaborado en obra",
+    "precio": 95000,
+    "unidad": "por viaje",
+    "icono": "../../assets/img/mixer.svg"
+  },
+  {
+    "id": "hidrogrua",
+    "nombre": "Hidrogrúa 8 Tn",
+    "categoria": "Servicio especial",
+    "capacidad": "8.000 kg de izaje",
+    "cargaMaxima": "8.000 kg",
+    "uso": "Carga y descarga de materiales pesados, vigas y paneles",
+    "precio": 60000,
+    "unidad": "por media jornada",
+    "icono": "../../assets/img/crane.svg"
+  }
+]
