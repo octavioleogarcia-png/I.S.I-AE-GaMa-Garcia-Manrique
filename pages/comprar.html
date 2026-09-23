@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedir un camión · GaMa</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="../index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="listado_tabla.html">Unidades (tabla)</a>
+        <a href="listado_box.html">Unidades (fichas)</a>
+        <a href="comprar.html" class="activo">Pedir un camión</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <h2>Completá el pedido</h2>
+      <p class="intro">Elegí una o más unidades, dejá tus datos de contacto y coordinamos el viaje. Te confirmamos por teléfono o e-mail antes de despachar el camión.</p>
+
+      <form id="formulario-pedido" class="formulario" novalidate>
+
+        <div class="campo">
+          <label for="nombre">Nombre y apellido</label>
+          <input type="text" id="nombre" name="nombre" required autocomplete="name" />
+          <span class="mensaje-error" data-error-de="nombre"></span>
+        </div>
+
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="Ej: 376 4123456" required autocomplete="tel" />
+          <span class="mensaje-error" data-error-de="telefono"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="direccion">Dirección de entrega</label>
+          <span class="ayuda">Calle, número, localidad. Si es una obra, indicá punto de acceso.</span>
+          <input type="text" id="direccion" name="direccion" required autocomplete="street-address" />
+          <span class="mensaje-error" data-error-de="direccion"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+          <span class="mensaje-error" data-error-de="email"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label>Medio de pago</label>
+          <div class="medios-pago">
+            <label><input type="radio" name="medioPago" value="Efectivo" required /> Efectivo, contra entrega</label>
+            <label><input type="radio" name="medioPago" value="Transferencia bancaria" /> Transferencia bancaria</label>
+            <label><input type="radio" name="medioPago" value="Tarjeta de débito/crédito" /> Tarjeta de débito o crédito</label>
+            <label><input type="radio" name="medioPago" value="Cheque" /> Cheque</label>
+          </div>
+          <span class="mensaje-error" data-error-de="medioPago"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label>Unidades solicitadas</label>
+          <span class="ayuda">Tildá las que necesitás y ajustá la cantidad de viajes o jornadas.</span>
+          <div class="lista-pedido" id="lista-pedido">
+            <!-- Ítems generados por script a partir de data.js -->
+          </div>
+          <div class="resumen-total">
+            <span>Total estimado</span>
+            <span class="cifra" id="total-estimado">$ 0</span>
+          </div>
+          <span class="mensaje-error" data-error-de="productos"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="comentarios">Comentarios (opcional)</label>
+          <textarea id="comentarios" name="comentarios" rows="3" placeholder="Horario preferido, referencias de acceso a la obra, etc."></textarea>
+        </div>
+
+        <div class="campo ancho-completo envio-formulario">
+          <button type="submit" class="boton boton-primario">Confirmar pedido</button>
+          <span>Te contactamos para coordinar el viaje.</span>
+        </div>
+
+        <div class="campo ancho-completo mensaje-confirmacion" id="mensaje-confirmacion">
+          Pedido registrado. En breve nos comunicamos para confirmar día y horario de entrega.
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Actividad Evaluativa 1 · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <script src="../assets/js/data.js"></script>
+  <script>
+    const parametros = new URLSearchParams(window.location.search);
+    const idPreseleccionado = parametros.get("id");
+
+    const listaPedido = document.getElementById("lista-pedido");
+
+    PRODUCTOS.forEach((p) => {
+      const fila = document.createElement("div");
+      fila.className = "item-pedido";
+      const marcado = p.id === idPreseleccionado ? "checked" : "";
+      fila.innerHTML = `
+        <input type="checkbox" class="check-producto" id="check-${p.id}" data-id="${p.id}" data-precio="${p.precio}" ${marcado} />
+        <label for="check-${p.id}" class="nombre">
+          ${p.nombre}
+          <small>${p.unidad}</small>
+        </label>
+        <span class="precio-unit">${formatearPrecio(p.precio)}</span>
+        <input type="number" class="cantidad" data-id="${p.id}" min="1" value="1" aria-label="Cantidad de ${p.nombre}" />
+      `;
+      listaPedido.appendChild(fila);
+    });
+
+    const totalEstimado = document.getElementById("total-estimado");
+
+    function recalcularTotal() {
+      let total = 0;
+      listaPedido.querySelectorAll(".item-pedido").forEach((fila) => {
+        const check = fila.querySelector(".check-producto");
+        const cantidad = fila.querySelector(".cantidad");
+        if (check.checked) {
+          total += Number(check.dataset.precio) * Number(cantidad.value || 1);
+        }
+      });
+      totalEstimado.textContent = formatearPrecio(total);
+    }
+
+    listaPedido.addEventListener("change", recalcularTotal);
+    listaPedido.addEventListener("input", recalcularTotal);
+    recalcularTotal();
+
+    const formulario = document.getElementById("formulario-pedido");
+    const mensajeConfirmacion = document.getElementById("mensaje-confirmacion");
+
+    function marcarError(campo, texto) {
+      const span = formulario.querySelector(`[data-error-de="${campo}"]`);
+      if (span) span.textContent = texto;
+    }
+
+    function limpiarErrores() {
+      formulario.querySelectorAll(".mensaje-error").forEach((s) => (s.textContent = ""));
+    }
+
+    formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+      limpiarErrores();
+      mensajeConfirmacion.classList.remove("visible");
+
+      let valido = true;
+
+      const nombre = formulario.nombre.value.trim();
+      if (nombre.length < 3) {
+        marcarError("nombre", "Ingresá tu nombre completo.");
+        valido = false;
+      }
+
+      const telefono = formulario.telefono.value.trim();
+      if (!/^[0-9 +()-]{6,}$/.test(telefono)) {
+        marcarError("telefono", "Ingresá un teléfono válido.");
+        valido = false;
+      }
+
+      const direccion = formulario.direccion.value.trim();
+      if (direccion.length < 5) {
+        marcarError("direccion", "Ingresá la dirección de entrega.");
+        valido = false;
+      }
+
+      const email = formulario.email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        marcarError("email", "Ingresá un e-mail válido.");
+        valido = false;
+      }
+
+      const medioPago = formulario.querySelector('input[name="medioPago"]:checked');
+      if (!medioPago) {
+        marcarError("medioPago", "Elegí un medio de pago.");
+        valido = false;
+      }
+
+      const productosElegidos = listaPedido.querySelectorAll(".check-producto:checked");
+      if (productosElegidos.length === 0) {
+        marcarError("productos", "Elegí al menos una unidad.");
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      mensajeConfirmacion.classList.add("visible");
+      mensajeConfirmacion.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  </script>
+
+</body>
+</html>
