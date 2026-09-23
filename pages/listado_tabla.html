@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unidades disponibles — Tabla · GaMa</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Encabezado con navegación -->
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <!-- Enlace activo: esta página -->
+        <a href="listado_tabla.html" class="activo">Unidades (tabla)</a>
+        <a href="listado_box.html">Unidades (fichas)</a>
+        <a href="comprar.html">Pedir un camión</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Sección principal: tabla de productos -->
+  <section class="seccion">
+    <div class="contenedor">
+      <h2>Todas las unidades</h2>
+      <p class="intro">Comparación rápida de capacidad y tarifa. Hacé clic en una unidad para ver la ficha completa.</p>
+
+      <!-- Contenedor con scroll horizontal para tabla en pantallas chicas -->
+      <div class="tabla-envoltorio">
+        <table class="tabla-productos">
+          <!-- Pie de tabla: aclaración sobre tarifas -->
+          <caption>Tarifas de referencia, sujetas a distancia y disponibilidad real de flota.</caption>
+          <!-- Encabezados de columnas -->
+          <thead>
+            <tr>
+              <th></th>
+              <th scope="col">Unidad</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Capacidad</th>
+              <th scope="col">Uso recomendado</th>
+              <th scope="col">Tarifa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <!-- Cuerpo de la tabla (se rellena con JavaScript) -->
+          <tbody id="cuerpo-tabla">
+            <!-- Filas generadas por script.js a partir de data.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pie de página -->
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Actividad Evaluativa 1 · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <!-- Cargar datos del catálogo -->
+  <script src="data.js"></script>
+  <!-- Script para generar filas de la tabla dinámicamente -->
+  <script>
+    // Obtener elemento tbody donde se insertarán las filas
+    const cuerpo = document.getElementById("cuerpo-tabla");
+
+    // Iterar sobre cada producto en el array PRODUCTOS
+    PRODUCTOS.forEach((p) => {
+      // Crear nueva fila
+      const fila = document.createElement("tr");
+      // Llenar fila con datos del producto
+      fila.innerHTML = `
+        <!-- Ícono pequeño del producto -->
+        <td><img class="icono-mini" src="${p.icono}" alt="" /></td>
+        <!-- Nombre del producto -->
+        <td>${p.nombre}</td>
+        <!-- Categoría con etiqueta estilizada -->
+        <td><span class="etiqueta">${p.categoria}</span></td>
+        <!-- Capacidad en m³ o kg -->
+        <td>${p.capacidad}</td>
+        <!-- Uso recomendado -->
+        <td>${p.uso}</td>
+        <!-- Precio formateado y unidad de tarifa -->
+        <td><span class="precio-cifra">${formatearPrecio(p.precio)}</span><br><small>${p.unidad}</small></td>
+        <!-- Enlace a ficha completa del producto (paso id como parámetro URL) -->
+        <td><a class="enlace-ficha" href="producto.html?id=${p.id}">Ver ficha</a></td>
+      `;
+      // Agregar fila al tbody
+      cuerpo.appendChild(fila);
+    });
+  </script>
+
+</body>
+</html>
