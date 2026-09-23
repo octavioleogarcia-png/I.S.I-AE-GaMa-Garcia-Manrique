@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unidades disponibles — Tabla · GaMa</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="../index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="listado_tabla.html" class="activo">Unidades (tabla)</a>
+        <a href="listado_box.html">Unidades (fichas)</a>
+        <a href="comprar.html">Pedir un camión</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <h2>Todas las unidades</h2>
+      <p class="intro">Comparación rápida de capacidad y tarifa. Hacé clic en una unidad para ver la ficha completa.</p>
+
+      <div class="tabla-envoltorio">
+        <table class="tabla-productos">
+          <caption>Tarifas de referencia, sujetas a distancia y disponibilidad real de flota.</caption>
+          <thead>
+            <tr>
+              <th></th>
+              <th scope="col">Unidad</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Capacidad</th>
+              <th scope="col">Uso recomendado</th>
+              <th scope="col">Tarifa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-tabla">
+            <!-- Filas generadas por script a partir de data.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Actividad Evaluativa 1 · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <script src="../assets/js/data.js"></script>
+  <script>
+    const cuerpo = document.getElementById("cuerpo-tabla");
+
+    PRODUCTOS.forEach((p) => {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td><img class="icono-mini" src="${p.icono}" alt="" /></td>
+        <td>${p.nombre}</td>
+        <td><span class="etiqueta">${p.categoria}</span></td>
+        <td>${p.capacidad}</td>
+        <td>${p.uso}</td>
+        <td><span class="precio-cifra">${formatearPrecio(p.precio)}</span><br><small>${p.unidad}</small></td>
+        <td><a class="enlace-ficha" href="producto.html?id=${p.id}">Ver ficha</a></td>
+      `;
+      cuerpo.appendChild(fila);
+    });
+  </script>
+
+</body>
+</html>
