@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Intercátedra IO + Paradigmas · Optimizador PL · GaMa</title>
+<link rel="stylesheet" href="../assets/css/style.css" />
+<style>
+  .seccion-pl {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  /* ---- Tarjeta de portada de la herramienta (título + intro) ---- */
+  .tarjeta-portada {
+    background: var(--asphalt);
+    color: var(--text-light);
+    padding: 34px 36px;
+    margin-bottom: 32px;
+    border-left: 6px solid var(--yellow);
+  }
+  .tarjeta-portada .etiqueta {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 10px;
+  }
+  .seccion-pl h1 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    margin: 0 0 16px;
+    color: #fff;
+  }
+  .tarjeta-portada ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--concrete-2);
+  }
+  .tarjeta-portada ul li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .tarjeta-portada ul li b { color: #fff; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--concrete-3);
+    padding: 28px 30px;
+    margin-bottom: 28px;
+  }
+  .panel h2 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    margin: 0 0 18px;
+    color: var(--asphalt);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--concrete-2);
+  }
+
+  /* ---- Función objetivo: fórmula bien separada de la referencia ---- */
+  .caja-formula {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--concrete-2);
+    border: 1px solid var(--concrete-3);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .caja-formula > span {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--asphalt);
+  }
+  .caja-formula select,
+  .caja-formula input {
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    padding: 9px 11px;
+    border: 1px solid var(--concrete-3);
+    border-radius: 2px;
+    background: #fff;
+  }
+  .caja-formula input[type="number"] { width: 110px; font-weight: 600; }
+  .caja-referencia {
+    font-size: 0.86rem;
+    color: #6b6656;
+    padding: 10px 14px;
+    background: var(--concrete);
+    border-left: 3px solid var(--steel);
+  }
+  .caja-referencia b { color: var(--steel); }
+
+  table.tabla-restricciones {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+    border: 1px solid var(--concrete-3);
+  }
+  table.tabla-restricciones th {
+    text-align: left;
+    font-size: 0.78rem;
+    color: #fff;
+    background: var(--asphalt);
+    padding: 10px 10px;
+    font-weight: 600;
+  }
+  table.tabla-restricciones td {
+    padding: 8px 10px;
+    border-top: 1px solid var(--concrete-3);
+    border-right: 1px solid var(--concrete-2);
+  }
+  table.tabla-restricciones tr:nth-child(even) td {
+    background: #fafaf7;
+  }
+  table.tabla-restricciones input,
+  table.tabla-restricciones select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 7px 8px;
+    border: 1px solid var(--concrete-3);
+    border-radius: 2px;
+    box-sizing: border-box;
+  }
+  table.tabla-restricciones .col-op,
+  table.tabla-restricciones .col-btn { width: 64px; }
+  .btn-quitar {
+    background: none;
+    border: 1px solid var(--rust);
+    color: var(--rust);
+    border-radius: 2px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .btn-quitar:hover { background: var(--rust); color: #fff; }
+  .acciones-panel {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .acciones-panel button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 2px;
+    border: 2px solid var(--asphalt);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.92rem;
+  }
+  #btn-calcular {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--asphalt);
+  }
+  #btn-calcular:hover { background: var(--yellow-dim); border-color: var(--yellow-dim); }
+  #btn-agregar:hover { background: var(--asphalt); color: #fff; }
+
+  #resultado {
+    display: none;
+  }
+  #resultado.visible { display: block; }
+  .resultado-optimo {
+    display: flex;
+    gap: 0;
+    background: var(--asphalt);
+    color: var(--text-light);
+    padding: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--asphalt);
+  }
+  .resultado-optimo .dato {
+    flex: 1;
+    padding: 20px 26px;
+    border-right: 1px solid #3a3f46;
+  }
+  .resultado-optimo .dato:last-child { border-right: none; background: #2a2200; }
+  .resultado-optimo .dato span.label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--concrete-3);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .resultado-optimo .dato span.valor {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--yellow);
+  }
+  table.tabla-vertices {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    border: 1px solid var(--concrete-3);
+  }
+  table.tabla-vertices th {
+    text-align: left;
+    background: var(--asphalt);
+    color: #fff;
+    padding: 10px 12px;
+    font-weight: 600;
+  }
+  table.tabla-vertices td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--concrete-3);
+    border-right: 1px solid var(--concrete-2);
+  }
+  table.tabla-vertices tr.es-optimo td {
+    background: #fff6df;
+    font-weight: 700;
+  }
+  #mensaje-error {
+    display: none;
+    background: #fdecea;
+    color: var(--rust);
+    border-left: 4px solid var(--rust);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.92rem;
+  }
+  #mensaje-error.visible { display: block; }
+  svg#grafico { border: 1px solid var(--concrete-3); background: #fff; }
+</style>
+</head>
+<body>
+
+<header class="encabezado">
+  <div class="contenedor">
+    <a href="../index.html" class="marca">
+      <span class="logo">Ga<span>Ma</span></span>
+      <span class="rubro">Transporte de material de construcción</span>
+    </a>
+  </div>
+</header>
+
+<div class="seccion-pl">
+  <div class="tarjeta-portada">
+    <span class="etiqueta">Intercátedra · Investigación Operativa + Paradigmas III</span>
+    <h1>Optimizador de Programación Lineal — Flota GaMa</h1>
+    <ul>
+      <li><b>Qué resuelve:</b> cuántos viajes mensuales conviene hacer con el Volcador Chico (x₁) y el Volcador Grande (x₂) para maximizar el ingreso de GaMa.</li>
+      <li><b>Modelo precargado:</b> el mismo de la Actividad de Evaluación 1 de Investigación Operativa (horas de conducción, gasoil disponible y contrato mínimo con un cliente fijo).</li>
+      <li><b>Es editable:</b> podés cambiar los coeficientes, agregar o quitar restricciones, y volver a calcular sin recargar la página.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h2>1. Función objetivo</h2>
+    <div class="caja-formula">
+      <select id="tipo-objetivo">
+        <option value="max" selected>Maximizar</option>
+        <option value="min">Minimizar</option>
+      </select>
+      <span>Z =</span>
+      <input type="number" id="coef-c1" value="45000" step="1" aria-label="Coeficiente de x1" />
+      <span>x₁ +</span>
+      <input type="number" id="coef-c2" value="78000" step="1" aria-label="Coeficiente de x2" />
+      <span>x₂</span>
+    </div>
+    <div class="caja-referencia">
+      <b>Referencia:</b> x₁ = cantidad de viajes/mes con el Volcador Chico &nbsp;·&nbsp; x₂ = cantidad de viajes/mes con el Volcador Grande
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Restricciones</h2>
+    <table class="tabla-restricciones">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Coef. x₁</th>
+          <th>Coef. x₂</th>
+          <th class="col-op">Tipo</th>
+          <th>Valor (b)</th>
+          <th class="col-btn"></th>
+        </tr>
+      </thead>
+      <tbody id="cuerpo-restricciones">
+        <!-- Filas iniciales generadas por JS a partir de RESTRICCIONES_INICIALES -->
+      </tbody>
+    </table>
+    <div class="acciones-panel">
+      <button type="button" id="btn-agregar">+ Agregar restricción</button>
+    </div>
+  </div>
+
+  <div class="acciones-panel" style="margin-bottom:28px;">
+    <button type="button" id="btn-calcular">Calcular óptimo</button>
+  </div>
+
+  <div id="mensaje-error"></div>
+
+  <div id="resultado">
+    <div class="resultado-optimo">
+      <div class="dato">
+        <span class="label">x₁ óptimo</span>
+        <span class="valor" id="out-x1">—</span>
+      </div>
+      <div class="dato">
+        <span class="label">x₂ óptimo</span>
+        <span class="valor" id="out-x2">—</span>
+      </div>
+      <div class="dato">
+        <span class="label">Z óptimo</span>
+        <span class="valor" id="out-z">—</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Vértices de la región factible evaluados</h2>
+      <table class="tabla-vertices">
+        <thead>
+          <tr><th>x₁</th><th>x₂</th><th>Z</th></tr>
+        </thead>
+        <tbody id="cuerpo-vertices"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Región factible (método gráfico)</h2>
+      <svg id="grafico" width="520" height="420" viewBox="0 0 520 420"></svg>
+    </div>
+  </div>
+</div>
+
+<footer class="pie-pagina">
+  <div class="contenedor">
+    <span>GaMa — Transporte de material de construcción</span>
+    <span>Intercátedra I.O. + Paradigmas III · I.S.I 3º Comisión A · 2026</span>
+  </div>
+</footer>
+
+<script src="solver.js"></script>
+</body>
+</html>
