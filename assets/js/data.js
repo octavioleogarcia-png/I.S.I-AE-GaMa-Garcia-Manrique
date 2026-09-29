@@ -115,3 +115,74 @@ function formatearPrecio(valor) {
 function buscarProducto(id) {
   return PRODUCTOS.find((p) => p.id === id);
 }
+// ====================================================================
+// RETO JS - OPCIÓN 3 (Buscador, Filtro y Fetch para listado_box.html)
+// ====================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const grilla = document.getElementById("grilla-productos");
+  const buscador = document.getElementById("inputBuscador");
+  
+  // Si no estamos en listado_box.html, cortamos la ejecución acá para no romper otras pantallas
+  if (!grilla || !buscador) return;
+
+  let catalogoAsincrono = [];
+
+  // 1. Carga asincrónica exclusiva para esta vista
+  async function cargarDatos() {
+    try {
+      const respuesta = await fetch("../actividad/actividad-2/productos.json");
+      if (!respuesta.ok) throw new Error("No se pudo cargar el archivo JSON");
+      
+      catalogoAsincrono = await respuesta.json();
+      renderizar(catalogoAsincrono);
+    } catch (error) {
+      console.error("Error:", error);
+      grilla.innerHTML = "<p>Hubo un problema al cargar las unidades.</p>";
+    }
+  }
+
+  // 2. Inyección dinámica en el DOM
+  function renderizar(productosA_Mostrar) {
+    grilla.innerHTML = ""; 
+
+    if (productosA_Mostrar.length === 0) {
+      grilla.innerHTML = "<p>No se encontraron unidades para esa búsqueda.</p>";
+      return;
+    }
+
+    productosA_Mostrar.forEach((p) => {
+      const tarjeta = document.createElement("article");
+      tarjeta.className = "box-producto";
+      // Reutilizamos tu función global formatearPrecio() que ya existe arriba
+      tarjeta.innerHTML = `
+        <div class="visor"><img src="${p.icono}" alt="" /></div>
+        <div class="cuerpo">
+          <span class="categoria">${p.categoria}</span>
+          <h3>${p.nombre}</h3>
+          <p class="uso">${p.uso}</p>
+          <div class="pie">
+            <span class="precio">${formatearPrecio(p.precio)}<small> ${p.unidad}</small></span>
+            <a class="boton boton-primario" href="producto.html?id=${p.id}">Ver ficha</a>
+          </div>
+        </div>
+      `;
+      grilla.appendChild(tarjeta);
+    });
+  }
+
+  // 3. Captura del evento input y filtro en memoria
+  buscador.addEventListener("input", (evento) => {
+    const termino = evento.target.value.toLowerCase();
+    
+    const filtrados = catalogoAsincrono.filter((p) => 
+      p.nombre.toLowerCase().includes(termino) ||
+      p.categoria.toLowerCase().includes(termino)
+    );
+    
+    renderizar(filtrados);
+  });
+
+  // Arrancamos la carga de datos
+  cargarDatos();
+});
