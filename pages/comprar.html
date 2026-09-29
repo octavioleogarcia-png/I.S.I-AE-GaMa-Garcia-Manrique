@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedir un camión · GaMa</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="../index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="listado_tabla.html">Unidades (tabla)</a>
+        <a href="listado_box.html">Unidades (fichas)</a>
+        <a href="comprar.html" class="activo">Pedir un camión</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <h2>Completá el pedido</h2>
+      <p class="intro">Elegí una o más unidades, dejá tus datos de contacto y coordinamos el viaje. Te confirmamos por teléfono o e-mail antes de despachar el camión.</p>
+
+      <form id="formulario-pedido" class="formulario" novalidate>
+
+        <div class="campo">
+          <label for="nombre">Nombre y apellido</label>
+          <input type="text" id="nombre" name="nombre" required autocomplete="name" />
+          <span class="mensaje-error" data-error-de="nombre"></span>
+        </div>
+
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="Ej: 376 4123456" required autocomplete="tel" />
+          <span class="mensaje-error" data-error-de="telefono"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="direccion">Dirección de entrega</label>
+          <span class="ayuda">Calle, número, localidad. Si es una obra, indicá punto de acceso.</span>
+          <input type="text" id="direccion" name="direccion" required autocomplete="street-address" />
+          <span class="mensaje-error" data-error-de="direccion"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+          <span class="mensaje-error" data-error-de="email"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label>Medio de pago</label>
+          <div class="medios-pago">
+            <label><input type="radio" name="medioPago" value="Efectivo" required /> Efectivo, contra entrega</label>
+            <label><input type="radio" name="medioPago" value="Transferencia bancaria" /> Transferencia bancaria</label>
+            <label><input type="radio" name="medioPago" value="Tarjeta de débito/crédito" /> Tarjeta de débito o crédito</label>
+            <label><input type="radio" name="medioPago" value="Cheque" /> Cheque</label>
+          </div>
+          <span class="mensaje-error" data-error-de="medioPago"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label>Unidades solicitadas</label>
+          <span class="ayuda">Tildá las que necesitás y ajustá la cantidad de viajes o jornadas.</span>
+          <div class="lista-pedido" id="lista-pedido">
+            <!-- Ítems generados por app.js a partir de data.js -->
+          </div>
+
+          <!-- Código de descuento: valida contra descuentos.json vía fetch() -->
+          <div class="caja-cupon-pedido">
+            <label for="input-cupon-pedido">¿Tenés un código de descuento?</label>
+            <div class="cupon-fila">
+              <input type="text" id="input-cupon-pedido" placeholder="Ej: UCP10" autocomplete="off" />
+              <button type="button" id="btn-aplicar-cupon" class="boton boton-secundario">Aplicar</button>
+            </div>
+            <span id="mensaje-cupon" class="mensaje-cupon"></span>
+          </div>
+
+          <!-- Resumen: subtotal, descuento (si aplica) y total -->
+          <div class="resumen-total-detallado">
+            <div class="linea-resumen">
+              <span>Subtotal</span>
+              <span class="cifra" id="subtotal-pedido">$ 0</span>
+            </div>
+            <div class="linea-resumen linea-descuento" id="linea-descuento">
+              <span id="etiqueta-descuento">Descuento</span>
+              <span class="cifra cifra-descuento" id="valor-descuento">− $ 0</span>
+            </div>
+            <div class="linea-resumen linea-total">
+              <span>Total estimado</span>
+              <span class="cifra" id="total-estimado">$ 0</span>
+            </div>
+          </div>
+          <span class="mensaje-error" data-error-de="productos"></span>
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="comentarios">Comentarios (opcional)</label>
+          <textarea id="comentarios" name="comentarios" rows="3" placeholder="Horario preferido, referencias de acceso a la obra, etc."></textarea>
+        </div>
+
+        <div class="campo ancho-completo envio-formulario">
+          <button type="submit" class="boton boton-primario">Confirmar pedido</button>
+          <span>Te contactamos para coordinar el viaje.</span>
+        </div>
+
+        <div class="campo ancho-completo mensaje-confirmacion" id="mensaje-confirmacion">
+          Pedido registrado. En breve nos comunicamos para confirmar día y horario de entrega.
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Actividad Evaluativa 2 · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <!-- Catálogo (array en memoria) -->
+  <script src="../assets/js/data.js"></script>
+  <!-- Toda la lógica de esta pantalla: captura de eventos + fetch a descuentos.json -->
+  <script src="../assets/js/app.js"></script>
+
+</body>
+</html>
