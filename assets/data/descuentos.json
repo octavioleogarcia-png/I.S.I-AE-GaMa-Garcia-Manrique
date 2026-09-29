@@ -1,0 +1,10 @@
+{
+  "reglasPorVolumen": [
+    { "minViajes": 5, "porcentaje": 10, "etiqueta": "10% por volumen (5+ viajes)" },
+    { "minViajes": 10, "porcentaje": 15, "etiqueta": "15% por volumen alto (10+ viajes)" }
+  ],
+  "cupones": {
+    "UCP10": { "porcentaje": 10, "etiqueta": "Cupón UCP10" },
+    "GAMA20": { "porcentaje": 20, "etiqueta": "Cupón GAMA20" }
+  }
+}
