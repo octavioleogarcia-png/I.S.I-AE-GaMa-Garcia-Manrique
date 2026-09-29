@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Unidades disponibles — Fichas · GaMa</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
+  
+  <!-- Script vinculado con defer: Garantiza el desacoplamiento total del HTML -->
+  <script src="../assets/js/data.js" defer></script>
 </head>
 <body>
 
@@ -28,8 +31,13 @@
       <h2>Todas las unidades</h2>
       <p class="intro">Elegí por tipo de trabajo: volcadores para obra urbana, transporte pesado para distancia y servicios especiales para hormigón o izaje.</p>
 
+      <!-- Reto JS Opción 3: Input para el filtro en tiempo real -->
+      <div style="margin-bottom: 2rem;">
+        <input type="text" id="inputBuscador" placeholder="Buscar unidad o categoría..." style="width: 100%; max-width: 400px; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;">
+      </div>
+
       <div class="grilla-box" id="grilla-productos">
-        <!-- Tarjetas generadas por script a partir de data.js -->
+        <!-- Tarjetas inyectadas dinámicamente mediante fetch() desde data.js -->
       </div>
     </div>
   </section>
@@ -40,33 +48,6 @@
       <span>Actividad Evaluativa 1 · I.S.I 3º Comisión A · 2026</span>
     </div>
   </footer>
-
-  <script src="../assets/js/data.js"></script>
-  <script>
-    const grilla = document.getElementById("grilla-productos");
-
-    PRODUCTOS.forEach((p) => {
-      const tarjeta = document.createElement("article");
-      tarjeta.className = "box-producto";
-      tarjeta.innerHTML = `
-        <div class="visor">${obtenerSvgInline(p.icono)}</div>
-        <div class="cuerpo">
-          <span class="categoria">${p.categoria}</span>
-          <h3>${p.nombre}</h3>
-          <p class="uso">${p.uso}</p>
-          <div class="pie">
-            <span class="precio">${formatearPrecio(p.precio)}<small>${p.unidad}</small></span>
-            <a class="boton boton-primario" href="producto.html?id=${p.id}">Ver ficha</a>
-          </div>
-        </div>
-      `;
-      grilla.appendChild(tarjeta);
-    });
-
-    function obtenerSvgInline(ruta) {
-      return `<img src="${ruta}" alt="" />`;
-    }
-  </script>
 
 </body>
 </html>
