@@ -943,3 +943,286 @@ table.tabla-productos tbody tr:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* =====================================================================
+   Sesión y cuenta (autenticación con PHP + BCRYPT)
+   ===================================================================== */
+
+/* Los bloques que no corresponden a la sesión actual se ocultan con el
+   atributo hidden. !important para ganarle a .boton, .campo, etc. */
+[hidden] {
+  display: none !important;
+}
+
+.nav-salir {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--concrete-2);
+  background: transparent;
+  border: 1px solid var(--asphalt-2);
+  padding: 7px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.nav-salir:hover {
+  background: var(--asphalt-2);
+  color: var(--text-light);
+}
+
+.campo input[type="password"] {
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  padding: 11px 13px;
+  border: 1px solid var(--concrete-3);
+  background: #fff;
+  color: var(--text-dark);
+  border-radius: 2px;
+}
+
+.campo input[readonly] {
+  background: var(--concrete-2);
+  color: #4d4839;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+.boton-oscuro {
+  background: var(--asphalt);
+  color: var(--text-light);
+}
+
+.boton-oscuro:hover {
+  background: var(--asphalt-2);
+}
+
+.boton-claro {
+  background: transparent;
+  color: var(--asphalt);
+  border-color: var(--asphalt);
+}
+
+/* ---------- Tarjeta de ingreso / registro ---------- */
+
+.tarjeta-acceso {
+  max-width: 560px;
+  background: #fff;
+  border: 1px solid var(--concrete-3);
+  border-top: 6px solid var(--yellow);
+  padding: 28px;
+}
+
+.pestanas {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+  border-bottom: 2px solid var(--concrete-2);
+}
+
+.pestana {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  border-bottom: 4px solid transparent;
+  margin-bottom: -2px;
+  padding: 8px 14px;
+  color: #6b6656;
+  cursor: pointer;
+}
+
+.pestana.activa {
+  color: var(--asphalt);
+  border-bottom-color: var(--yellow);
+}
+
+.formulario-acceso {
+  max-width: none;
+  gap: 18px 20px;
+}
+
+/* ---------- Avisos ---------- */
+
+.aviso {
+  padding: 13px 16px;
+  margin-bottom: 18px;
+  font-size: 0.93rem;
+  border-left: 4px solid var(--steel);
+  background: #e3ecf0;
+  color: #1d3a4a;
+}
+
+.aviso-error {
+  border-left-color: var(--rust);
+  background: #fbe7de;
+  color: #7a2c0c;
+}
+
+.aviso-sesion {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 10px 0 0;
+}
+
+.aviso-acciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aviso-acciones .boton {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+}
+
+.mensaje-confirmacion a {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Panel "Mi cuenta" ---------- */
+
+.cabecera-cuenta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.cabecera-cuenta .intro {
+  margin-bottom: 0;
+}
+
+.datos-cuenta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--concrete-3);
+  border: 1px solid var(--concrete-3);
+  margin: 0 0 40px;
+}
+
+.datos-cuenta div {
+  background: #fff;
+  padding: 16px 18px;
+}
+
+.datos-cuenta dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6656;
+}
+
+.datos-cuenta dd {
+  margin: 4px 0 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.titulo-pedidos {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.lista-mis-pedidos {
+  display: grid;
+  gap: 16px;
+}
+
+.pedido {
+  background: #fff;
+  border: 1px solid var(--concrete-3);
+  border-left: 5px solid var(--yellow);
+}
+
+.pedido-cabecera,
+.pedido-pie {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+}
+
+.pedido-cabecera {
+  border-bottom: 1px solid var(--concrete-2);
+}
+
+.pedido-cabecera strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.pedido-fecha {
+  color: #6b6656;
+  font-size: 0.88rem;
+}
+
+.estado {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: var(--yellow);
+  color: var(--asphalt);
+}
+
+.estado-confirmado,
+.estado-en-viaje { background: var(--steel); color: var(--text-light); }
+.estado-entregado { background: #1e7b3c; color: #fff; }
+.estado-cancelado { background: var(--concrete-3); color: #4d4839; }
+
+.pedido-items {
+  list-style: none;
+  margin: 0;
+  padding: 10px 18px;
+}
+
+.pedido-items li {
+  padding: 4px 0;
+}
+
+.pedido-items small {
+  color: #6b6656;
+}
+
+.pedido-pie {
+  justify-content: space-between;
+  background: var(--concrete);
+  font-size: 0.9rem;
+}
+
+.pedido-total strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--rust);
+}
+
+@media (max-width: 600px) {
+  .datos-cuenta {
+    grid-template-columns: 1fr;
+  }
+  .tarjeta-acceso {
+    padding: 20px 16px;
+  }
+}
