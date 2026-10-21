@@ -7,7 +7,7 @@
 <meta name="description" content="GaMa gestiona el traslado de material de construcción: volcadores, acoplados, mixer e hidrogrúa, con presupuesto y pedido en línea." />
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
+<body data-raiz="">
 <!-- Encabezado: logo y menú de navegación -->
 <header class="encabezado">
 <div class="contenedor">
@@ -22,6 +22,10 @@
 <a href="pages/listado_tabla.html">Unidades (tabla)</a>
 <a href="pages/listado_box.html">Unidades (fichas)</a>
 <a href="pages/comprar.html">Pedir un camión</a>
+<!-- Sesión: se alterna según la respuesta de api/perfil.php -->
+<a href="pages/acceso.html" data-vista="visitante">Ingresar</a>
+<a href="pages/acceso.html" class="nav-cuenta" data-vista="usuario" hidden>Hola, <span data-usuario-nombre="corto"></span></a>
+<button type="button" class="nav-salir" data-vista="usuario" data-accion="salir" hidden>Salir</button>
 </nav>
 </div>
 </header>
@@ -96,5 +100,6 @@
 <span>Actividad Evaluativa 1 · I.S.I 3º Comisión A · 2026</span>
 </div>
 </footer>
+  <script src="assets/js/sesion.js"></script>
 </body>
 </html>
