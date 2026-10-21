@@ -7,6 +7,14 @@
    Este archivo concentra TODO el JavaScript de comprar.html.
    No hay ningún onclick="" ni onsubmit="" en el HTML: cada
    interacción se conecta acá mediante addEventListener().
+
+   Autenticación (BCRYPT + sesiones PHP):
+   - Cualquiera puede armar el presupuesto.
+   - Solo un usuario con sesión puede CONFIRMAR el pedido: se
+     envía por fetch() POST al endpoint privado
+     api/mis_pedidos.php, que responde 401 si no hay sesión.
+   - El estado de sesión lo resuelve assets/js/sesion.js
+     (evento "gama:sesion").
    ============================================================ */
 
 // ---------- Referencias a nodos del DOM ----------
@@ -23,6 +31,7 @@ const mensajeCupon = document.getElementById("mensaje-cupon");
 
 const formulario = document.getElementById("formulario-pedido");
 const mensajeConfirmacion = document.getElementById("mensaje-confirmacion");
+const btnConfirmar = document.getElementById("btn-confirmar");
 
 // ---------- Estado en memoria ----------
 let reglasDescuento = null; // se completa con fetch() antes de poder calcular
@@ -163,7 +172,7 @@ function limpiarErrores() {
   formulario.querySelectorAll(".mensaje-error").forEach((s) => (s.textContent = ""));
 }
 
-function manejarEnvioFormulario(evento) {
+async function manejarEnvioFormulario(evento) {
   evento.preventDefault();
   limpiarErrores();
   mensajeConfirmacion.classList.remove("visible");
@@ -208,8 +217,74 @@ function manejarEnvioFormulario(evento) {
 
   if (!valido) return;
 
+  // Sin sesión no se puede confirmar (el servidor igual lo rechazaría con 401).
+  if (!GaMaSesion.usuario) {
+    marcarError("envio", "Ingresá a tu cuenta para confirmar el pedido.");
+    return;
+  }
+
+  // Ítems elegidos: solo id y cantidad. El PRECIO lo pone el servidor.
+  const items = Array.from(productosElegidos).map((check) => {
+    const cantidad = listaPedido.querySelector(`.cantidad[data-id="${check.dataset.id}"]`);
+    return { id: check.dataset.id, cantidad: Number(cantidad.value) || 1 };
+  });
+
+  btnConfirmar.disabled = true;
+  btnConfirmar.textContent = "Enviando…";
+
+  const { ok, status, datos } = await GaMaSesion.llamarApi(GaMaSesion.API.misPedidos, {
+    metodo: "POST",
+    datos: {
+      direccion,
+      telefono,
+      medio_pago: medioPago.value,
+      comentarios: formulario.comentarios.value.trim(),
+      cupon: cuponAplicado ? cuponAplicado.codigo : "",
+      items,
+    },
+  });
+
+  btnConfirmar.disabled = false;
+  btnConfirmar.textContent = "Confirmar pedido";
+
+  if (status === 401) {
+    // La sesión venció: se vuelve a la vista de visitante.
+    GaMaSesion.establecer(null);
+    marcarError("envio", "Tu sesión terminó. Ingresá de nuevo para confirmar el pedido.");
+    return;
+  }
+  if (!ok) {
+    marcarError("envio", datos.mensaje || "No se pudo registrar el pedido.");
+    return;
+  }
+
+  // Confirmación armada con textContent + createElement (sin innerHTML).
+  const pedido = datos.data;
+  const enlace = document.createElement("a");
+  enlace.href = "acceso.html";
+  enlace.textContent = "Ver mis pedidos";
+  mensajeConfirmacion.replaceChildren(
+    `Pedido N.º ${pedido.id} registrado por ${formatearPrecio(pedido.total)}. ` +
+      "En breve nos comunicamos para confirmar día y horario de entrega. ",
+    enlace
+  );
   mensajeConfirmacion.classList.add("visible");
   mensajeConfirmacion.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// ---------- Datos del usuario logueado en el formulario ----------
+// Nombre y e-mail salen de la cuenta: se precargan y quedan de solo lectura.
+function aplicarSesionAlFormulario(evento) {
+  const usuario = evento.detail.usuario;
+  formulario.nombre.readOnly = !!usuario;
+  formulario.email.readOnly = !!usuario;
+
+  if (usuario) {
+    formulario.nombre.value = usuario.nombre;
+    formulario.email.value = usuario.email;
+    if (formulario.telefono.value.trim() === "") formulario.telefono.value = usuario.telefono;
+    marcarError("envio", "");
+  }
 }
 
 /* ------------------------------------------------------------
@@ -229,5 +304,8 @@ async function inicializarPedido() {
   btnAplicarCupon.addEventListener("click", aplicarCupon);
   formulario.addEventListener("submit", manejarEnvioFormulario);
 }
+
+// Se registra de inmediato para no perder la primera respuesta de sesión.
+document.addEventListener("gama:sesion", aplicarSesionAlFormulario);
 
 window.addEventListener("load", inicializarPedido);
