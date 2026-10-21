@@ -6,7 +6,7 @@
   <title>Pedir un camión · GaMa</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
+<body data-raiz="../">
 
   <header class="encabezado">
     <div class="contenedor">
@@ -19,6 +19,10 @@
         <a href="listado_tabla.html">Unidades (tabla)</a>
         <a href="listado_box.html">Unidades (fichas)</a>
         <a href="comprar.html" class="activo">Pedir un camión</a>
+        <!-- Sesión: se alterna según la respuesta de api/perfil.php -->
+        <a href="acceso.html" data-vista="visitante">Ingresar</a>
+        <a href="acceso.html" class="nav-cuenta" data-vista="usuario" hidden>Hola, <span data-usuario-nombre="corto"></span></a>
+        <button type="button" class="nav-salir" data-vista="usuario" data-accion="salir" hidden>Salir</button>
       </nav>
     </div>
   </header>
@@ -106,14 +110,23 @@
           <textarea id="comentarios" name="comentarios" rows="3" placeholder="Horario preferido, referencias de acceso a la obra, etc."></textarea>
         </div>
 
-        <div class="campo ancho-completo envio-formulario">
-          <button type="submit" class="boton boton-primario">Confirmar pedido</button>
-          <span>Te contactamos para coordinar el viaje.</span>
+        <!-- Visitante (401): puede armar el presupuesto, pero no confirmarlo -->
+        <div class="campo ancho-completo aviso aviso-info aviso-sesion" data-vista="visitante">
+          <span>Podés armar el presupuesto sin cuenta. Para <strong>confirmar el pedido</strong> necesitás ingresar.</span>
+          <span class="aviso-acciones">
+            <a href="acceso.html?volver=comprar" class="boton boton-oscuro">Ingresar</a>
+            <a href="acceso.html?modo=registro&amp;volver=comprar" class="boton boton-claro">Crear cuenta</a>
+          </span>
         </div>
 
-        <div class="campo ancho-completo mensaje-confirmacion" id="mensaje-confirmacion">
-          Pedido registrado. En breve nos comunicamos para confirmar día y horario de entrega.
+        <!-- Usuario autenticado (200): botón de confirmación -->
+        <div class="campo ancho-completo envio-formulario" data-vista="usuario" hidden>
+          <button type="submit" class="boton boton-primario" id="btn-confirmar">Confirmar pedido</button>
+          <span>Pedido a nombre de <strong data-usuario-nombre></strong>. Te contactamos para coordinar el viaje.</span>
         </div>
+        <span class="campo ancho-completo mensaje-error" data-error-de="envio"></span>
+
+        <div class="campo ancho-completo mensaje-confirmacion" id="mensaje-confirmacion" role="status"></div>
 
       </form>
     </div>
@@ -128,7 +141,10 @@
 
   <!-- Catálogo (array en memoria) -->
   <script src="../assets/js/data.js"></script>
-  <!-- Toda la lógica de esta pantalla: captura de eventos + fetch a descuentos.json -->
+  <!-- Estado de sesión (fetch a api/perfil.php) -->
+  <script src="../assets/js/sesion.js"></script>
+  <!-- Toda la lógica de esta pantalla: captura de eventos, fetch a descuentos.json
+       y envío del pedido al endpoint privado api/mis_pedidos.php -->
   <script src="../assets/js/app.js"></script>
 
 </body>

@@ -6,7 +6,7 @@
   <title>Unidades disponibles — Tabla · GaMa</title>
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
-<body>
+<body data-raiz="../">
 
   <header class="encabezado">
     <div class="contenedor">
@@ -19,6 +19,10 @@
         <a href="listado_tabla.html" class="activo">Unidades (tabla)</a>
         <a href="listado_box.html">Unidades (fichas)</a>
         <a href="comprar.html">Pedir un camión</a>
+        <!-- Sesión: se alterna según la respuesta de api/perfil.php -->
+        <a href="acceso.html" data-vista="visitante">Ingresar</a>
+        <a href="acceso.html" class="nav-cuenta" data-vista="usuario" hidden>Hola, <span data-usuario-nombre="corto"></span></a>
+        <button type="button" class="nav-salir" data-vista="usuario" data-accion="salir" hidden>Salir</button>
       </nav>
     </div>
   </header>
@@ -76,5 +80,7 @@
     });
   </script>
 
+  <!-- Estado de sesión (fetch a api/perfil.php) -->
+  <script src="../assets/js/sesion.js"></script>
 </body>
 </html>

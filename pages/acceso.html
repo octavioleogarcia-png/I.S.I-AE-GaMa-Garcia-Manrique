@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi cuenta · GaMa</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body data-raiz="../">
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <a href="../index.html" class="marca">
+        <span class="logo">Ga<span>Ma</span></span>
+        <span class="rubro">Transporte de material de construcción</span>
+      </a>
+      <nav class="nav">
+        <a href="../index.html">Inicio</a>
+        <a href="listado_tabla.html">Unidades (tabla)</a>
+        <a href="listado_box.html">Unidades (fichas)</a>
+        <a href="comprar.html">Pedir un camión</a>
+        <a href="acceso.html" class="activo" data-vista="visitante">Ingresar</a>
+        <a href="acceso.html" class="activo nav-cuenta" data-vista="usuario" hidden>Hola, <span data-usuario-nombre="corto"></span></a>
+        <button type="button" class="nav-salir" data-vista="usuario" data-accion="salir" hidden>Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== VISTA VISITANTE (401) ===================== -->
+  <section class="seccion" id="vista-acceso" data-vista="visitante">
+    <div class="contenedor">
+      <h2>Tu cuenta GaMa</h2>
+      <p class="intro">Con tu cuenta confirmás pedidos de camiones y seguís su estado en un solo lugar.</p>
+
+      <div class="tarjeta-acceso">
+        <div class="pestanas" role="tablist">
+          <button type="button" class="pestana activa" id="tab-login" role="tab" aria-selected="true">Ingresar</button>
+          <button type="button" class="pestana" id="tab-registro" role="tab" aria-selected="false">Crear cuenta</button>
+        </div>
+
+        <div class="aviso" id="msg-acceso" role="status" hidden></div>
+
+        <!-- Formulario de ingreso -->
+        <form id="form-login" class="formulario formulario-acceso" novalidate>
+          <div class="campo ancho-completo">
+            <label for="login-email">E-mail</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" required />
+          </div>
+          <div class="campo ancho-completo">
+            <label for="login-pass">Contraseña</label>
+            <input type="password" id="login-pass" name="password" autocomplete="current-password" required />
+          </div>
+          <div class="campo ancho-completo">
+            <button type="submit" class="boton boton-primario">Ingresar</button>
+          </div>
+        </form>
+
+        <!-- Formulario de registro -->
+        <form id="form-registro" class="formulario formulario-acceso" novalidate hidden>
+          <div class="campo ancho-completo">
+            <label for="reg-nombre">Nombre o razón social</label>
+            <input type="text" id="reg-nombre" name="nombre" autocomplete="organization" maxlength="100" required />
+          </div>
+          <div class="campo">
+            <label for="reg-email">E-mail</label>
+            <input type="email" id="reg-email" name="email" autocomplete="email" maxlength="150" required />
+          </div>
+          <div class="campo">
+            <label for="reg-telefono">Teléfono</label>
+            <input type="tel" id="reg-telefono" name="telefono" placeholder="Ej: 376 4123456" autocomplete="tel" required />
+          </div>
+          <div class="campo ancho-completo">
+            <label for="reg-pass">Contraseña</label>
+            <span class="ayuda">Entre 8 y 72 caracteres.</span>
+            <input type="password" id="reg-pass" name="password" autocomplete="new-password" minlength="8" maxlength="72" required />
+          </div>
+          <div class="campo ancho-completo">
+            <button type="submit" class="boton boton-primario">Crear cuenta</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================ VISTA USUARIO AUTENTICADO (200) ================ -->
+  <section class="seccion" id="vista-cuenta" data-vista="usuario" hidden>
+    <div class="contenedor">
+      <div class="cabecera-cuenta">
+        <div>
+          <h2>Hola, <span data-usuario-nombre></span></h2>
+          <p class="intro">Desde acá seguís tus pedidos de camiones.</p>
+        </div>
+        <button type="button" class="boton boton-oscuro" data-accion="salir">Cerrar sesión</button>
+      </div>
+
+      <dl class="datos-cuenta">
+        <div><dt>E-mail</dt><dd data-usuario-email></dd></div>
+        <div><dt>Teléfono</dt><dd data-usuario-telefono></dd></div>
+        <div><dt>Tipo de cuenta</dt><dd><span class="etiqueta" data-usuario-rol></span></dd></div>
+      </dl>
+
+      <div class="cabecera-cuenta">
+        <h3 class="titulo-pedidos">Mis pedidos</h3>
+        <a href="comprar.html" class="boton boton-primario">Pedir un camión</a>
+      </div>
+
+      <div class="aviso" id="msg-pedidos" role="status" hidden></div>
+      <!-- Se completa con fetch() a api/mis_pedidos.php (endpoint privado) -->
+      <div id="lista-mis-pedidos" class="lista-mis-pedidos"></div>
+    </div>
+  </section>
+
+  <footer class="pie-pagina">
+    <div class="contenedor">
+      <span>GaMa — Transporte de material de construcción</span>
+      <span>Autenticación con PHP y MySQL · I.S.I 3º Comisión A · 2026</span>
+    </div>
+  </footer>
+
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/sesion.js"></script>
+  <script src="../assets/js/acceso.js"></script>
+</body>
+</html>
