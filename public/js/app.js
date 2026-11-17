@@ -178,3 +178,124 @@ function validarCampos(campos) {
   if (primero) primero.focus();
   return primero === null;
 }
+
+/* ===================== 4. MENÚ Y ROUTER ===================== */
+
+const RUTAS = [
+  { patron: /^#\/?$/,                 titulo: "Inicio",               vista: vistaInicio },
+];
+
+function actualizarMenu() {
+  const hash = location.hash || "#/";
+  const enlaces = [["#/", "Inicio"], ["#/catalogo", "Unidades"]];
+  const n = totalItemsCarrito();
+  enlaces.push(["#/pedido", n ? `Pedir un camión (${n})` : "Pedir un camión"]);
+  if (estado.usuario) {
+    enlaces.push(["#/mis-pedidos", "Mis pedidos"]);
+    if (esStaff()) enlaces.push(["#/operacion", "Operación"]);
+    if (estado.usuario.rol === "gerente") enlaces.push(["#/reportes", "Reportes"]);
+  } else {
+    enlaces.push(["#/acceso", "Ingresar"]);
+  }
+  const items = enlaces.map(([destino, texto]) => el("li", {},
+    el("a", { href: destino, "aria-current": hash === destino ? "page" : null, texto })));
+  if (estado.usuario) {
+    items.push(el("li", {}, el("button", { type: "button", on: { click: cerrarSesion } },
+      "Salir", soloLectores(` (${estado.usuario.nombre})`))));
+  }
+  document.getElementById("menu").replaceChildren(...items);
+}
+
+async function cerrarSesion() {
+  await api("logout.php", { metodo: "POST" });
+  estado.usuario = null; estado.csrf = "";
+  actualizarMenu();
+  anunciar("Cerraste sesión.");
+  if (location.hash === "#/") navegar(); else location.hash = "#/";
+}
+
+let secuencia = 0;       // evita que una vista lenta pise a otra más nueva
+let primeraCarga = true;
+
+async function navegar() {
+  const hash = location.hash || "#/";
+  // Anclas internas (por ejemplo "#contenido") no son rutas de la SPA.
+  if (!hash.startsWith("#/")) return;
+  let ruta = null, parametros = [];
+  for (const r of RUTAS) {
+    const m = hash.match(r.patron);
+    if (m) { ruta = r; parametros = m.slice(1); break; }
+  }
+  const main = document.getElementById("contenido");
+  const mia = ++secuencia;
+
+  // Rutas protegidas: sin sesión se manda a ingresar y se recuerda a dónde volver.
+  if (ruta && ruta.roles && !estado.usuario) {
+    estado.destino = hash;
+    estado.avisoAcceso = "Para ver esa sección tenés que ingresar con tu cuenta.";
+    location.hash = "#/acceso";
+    return;
+  }
+
+  main.replaceChildren();
+  actualizarMenu();
+
+  if (!ruta) {
+    document.title = "Página no encontrada — GaMa";
+    main.append(el("h1", { texto: "No encontramos esa página" }),
+      el("p", {}, "Probá volver al ", el("a", { href: "#/", texto: "inicio" }), " o mirar las ", el("a", { href: "#/catalogo", texto: "unidades disponibles" }), "."));
+  } else if (ruta.roles && !ruta.roles.includes(estado.usuario.rol)) {
+    document.title = "Sin permiso — GaMa";
+    main.append(el("h1", { texto: "No tenés permiso para esta sección" }),
+      el("p", {}, "Tu cuenta no tiene acceso a esta pantalla. ", el("a", { href: "#/", texto: "Volver al inicio" }), "."));
+  } else {
+    document.title = `${ruta.titulo} — GaMa`;
+    await ruta.vista(main, ...parametros);
+  }
+  if (mia !== secuencia) return;
+
+  // Accesibilidad: el foco pasa al título de la vista nueva (no en la carga inicial).
+  const h1 = main.querySelector("h1");
+  if (h1 && !primeraCarga) { h1.tabIndex = -1; h1.focus(); window.scrollTo(0, 0); }
+  primeraCarga = false;
+}
+
+/* ===================== 5. VISTAS ===================== */
+
+/* ---------- Inicio ---------- */
+function vistaInicio(main) {
+  const modulos = [
+    ["Catálogo", "Fichas técnicas de cada unidad de la flota, con búsqueda y filtro por categoría."],
+    ["Pedidos", "Pedí uno o varios camiones y mirá el total con descuentos antes de confirmar."],
+    ["Operación", "El personal confirma, despacha y cierra los pedidos, y mantiene al día la flota."],
+    ["Reportes", "El gerente ve ingresos, rendimiento por unidad y clientes principales."],
+  ];
+  main.append(
+    el("section", { class: "hero", "aria-labelledby": "titulo-inicio" },
+      el("h1", { id: "titulo-inicio", texto: "Tu obra, abastecida a tiempo." }),
+      el("p", {}, "Coordinamos volcadores, acoplados, mixer e hidrogrúa para que el material llegue cuando la obra lo necesita, sin que tengas que estar atrás del teléfono todo el día."),
+      el("div", { class: "acciones" },
+        el("a", { class: "boton", href: "#/catalogo", texto: "Ver unidades disponibles" }),
+        el("a", { class: "boton boton-claro", href: "#/pedido", texto: "Pedir un camión" }))),
+    el("section", { "aria-labelledby": "titulo-modulos" },
+      el("h2", { id: "titulo-modulos", texto: "Qué podés hacer en GaMa" }),
+      el("ul", { class: "modulos" }, modulos.map(([t, d]) =>
+        el("li", { class: "modulo" }, el("h3", { texto: t }), el("p", { texto: d }))))));
+}
+
+/* ===================== 6. ARRANQUE ===================== */
+window.addEventListener("hashchange", navegar);
+
+// Enlace «Saltar al contenido»: mueve el foco al <main> sin tocar el hash de la SPA.
+document.querySelector(".saltar").addEventListener("click", (e) => {
+  e.preventDefault();
+  const main = document.getElementById("contenido");
+  main.focus();
+  main.scrollIntoView();
+});
+
+(async function iniciar() {
+  await cargarSesion();
+  actualizarMenu();
+  await navegar();
+})();
