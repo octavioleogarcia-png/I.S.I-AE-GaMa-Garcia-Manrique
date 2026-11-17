@@ -189,6 +189,7 @@ const RUTAS = [
   { patron: /^#\/acceso$/,            titulo: "Ingresar o crear cuenta", vista: vistaAcceso },
   { patron: /^#\/mis-pedidos$/,       titulo: "Mis pedidos",          vista: vistaMisPedidos, roles: ["cliente", "operario", "gerente"] },
   { patron: /^#\/operacion$/,         titulo: "Operación",            vista: vistaOperacion, roles: ROL_STAFF },
+  { patron: /^#\/reportes$/,          titulo: "Reportes",             vista: vistaReportes,  roles: ["gerente"] },
 ];
 
 function actualizarMenu() {
@@ -764,6 +765,34 @@ async function vistaOperacion(main) {
     el("section", { class: "seccion", "aria-labelledby": "titulo-op-flota" },
       el("h2", { id: "titulo-op-flota", texto: "Flota" }), avisoFlota, tablaFlota, formFlota));
   await Promise.all([cargarPedidos(), cargarFlota()]);
+}
+
+/* ---------- Reportes (gerente) ---------- */
+async function vistaReportes(main) {
+  const aviso = crearAviso("aviso-reportes");
+  const contenido = el("div", { id: "contenido-reportes" });
+  main.append(el("h1", { texto: "Reportes" }), aviso, contenido);
+  contenido.setAttribute("aria-busy", "true");
+  const r = await api("reportes.php");
+  contenido.removeAttribute("aria-busy");
+  if (!r.ok) { if (r.status !== 401) mostrarAviso(aviso, mensajeDe(r, "No se pudieron cargar los reportes."), "error"); return; }
+  const d = r.datos.data;
+
+  const tabla = (titulo, columnas, filas) => el("div", { class: "seccion" },
+    el("div", { class: "tabla-envoltorio" }, el("table", {},
+      el("caption", { texto: titulo }),
+      el("thead", {}, el("tr", {}, columnas.map(([t, num]) => el("th", { scope: "col", class: num ? "num" : null, texto: t })))),
+      el("tbody", {}, filas.length ? filas.map((fila) => el("tr", {}, fila.map((v, i) => i === 0 ? el("th", { scope: "row", texto: v }) : el("td", { class: columnas[i][1] ? "num" : null, texto: v }))))
+        : el("tr", {}, el("td", { colspan: columnas.length, texto: "Sin datos todavía." }))))));
+
+  contenido.append(
+    el("ul", { class: "tarjetas" },
+      [["Pedidos registrados", String(d.totales.pedidos)], ["Ingresos (sin cancelados)", dinero(d.totales.ingresos)], ["Ticket promedio", dinero(d.totales.ticket_promedio)]]
+        .map(([n, v]) => el("li", { class: "tarjeta" }, el("p", { class: "valor", texto: v }), el("p", { class: "nombre", texto: n })))),
+    tabla("Pedidos por estado", [["Estado"], ["Cantidad", true]], d.por_estado.map((x) => [x.estado, String(x.cantidad)])),
+    tabla("Rendimiento por unidad", [["Unidad"], ["Viajes", true], ["Ingresos", true]], d.por_unidad.map((x) => [x.nombre, String(x.viajes), dinero(x.ingresos)])),
+    tabla("Clientes principales", [["Cliente"], ["Pedidos", true], ["Total", true]], d.por_cliente.map((x) => [x.nombre, String(x.pedidos), dinero(x.total)])));
+  mostrarAviso(aviso, "Reportes actualizados.");
 }
 
 /* ===================== 6. ARRANQUE ===================== */
