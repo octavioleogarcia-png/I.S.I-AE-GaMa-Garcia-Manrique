@@ -185,6 +185,7 @@ const RUTAS = [
   { patron: /^#\/?$/,                 titulo: "Inicio",               vista: vistaInicio },
   { patron: /^#\/catalogo$/,          titulo: "Unidades disponibles", vista: vistaCatalogo },
   { patron: /^#\/unidad\/([a-z0-9-]+)$/, titulo: "Ficha de la unidad", vista: vistaUnidad },
+  { patron: /^#\/pedido$/,            titulo: "Pedir un camión",      vista: vistaPedido },
 ];
 
 function actualizarMenu() {
@@ -390,6 +391,129 @@ async function vistaUnidad(main, id) {
       el("dt", { texto: "Tarifa" }), el("dd", { texto: `${dinero(u.precio)} ${u.tarifa}` })),
     el("div", { class: "acciones" }, botonAgregar(u),
       el("a", { class: "boton boton-claro", href: "#/pedido", texto: "Ir al pedido" })));
+}
+
+/* ---------- Pedido ---------- */
+async function vistaPedido(main) {
+  main.append(el("h1", { texto: "Pedir un camión" }));
+  if (estado.carrito.size === 0) {
+    main.append(el("p", {}, "Todavía no elegiste ninguna unidad. ", el("a", { href: "#/catalogo", texto: "Mirá las unidades disponibles" }), " y agregá las que necesites."));
+    return;
+  }
+
+  const cupon = crearCampo("cupon", "Código de descuento", { requerido: false, autocomplete: "off", maxlength: 20 });
+  const resumen = el("div", { id: "resumen-pedido", class: "resumen", "aria-live": "polite", "aria-atomic": "true" });
+  const avisoPedido = crearAviso("aviso-pedido");
+  let cuponAplicado = "";
+
+  const listaLineas = el("ul", { class: "lineas" });
+  function dibujarLineas() {
+    listaLineas.replaceChildren(...[...estado.carrito.values()].map(({ unidad, cantidad }) => {
+      const id = `cant-${unidad.id}`;
+      const entrada = el("input", { id, type: "number", min: 1, max: 100, value: cantidad, inputmode: "numeric",
+        on: { change: () => {
+          const n = parseInt(entrada.value, 10);
+          if (Number.isInteger(n) && n >= 1 && n <= 100) { estado.carrito.get(unidad.id).cantidad = n; actualizarMenu(); recalcular(); }
+          else { entrada.value = estado.carrito.get(unidad.id).cantidad; anunciar("La cantidad debe ser un número entero entre 1 y 100."); }
+        } } });
+      return el("li", { class: "linea", "data-id": unidad.id },
+        el("div", {}, el("strong", { texto: unidad.nombre }), el("br"), el("span", { class: "ayuda", texto: `${dinero(unidad.precio)} ${unidad.tarifa}` })),
+        el("div", { class: "campo" }, el("label", { for: id }, "Cantidad", soloLectores(` de ${unidad.nombre}`)), entrada),
+        el("button", { type: "button", class: "boton boton-peligro boton-chico", on: { click: () => quitar(unidad) } }, "Quitar", soloLectores(`: ${unidad.nombre}`)));
+    }));
+  }
+  function quitar(unidad) {
+    const lista = [...estado.carrito.keys()];
+    const pos = lista.indexOf(unidad.id);
+    estado.carrito.delete(unidad.id);
+    actualizarMenu();
+    anunciar(`${unidad.nombre} quitado del pedido.`);
+    if (estado.carrito.size === 0) { navegar(); return; }
+    dibujarLineas(); recalcular();
+    // El foco vuelve a un botón "Quitar" cercano para no perder la posición.
+    const botones = listaLineas.querySelectorAll("button");
+    (botones[Math.min(pos, botones.length - 1)] || cupon.control).focus();
+  }
+
+  const cuerpoPresupuesto = () => ({
+    items: [...estado.carrito.entries()].map(([id, { cantidad }]) => ({ id, cantidad })),
+    cupon: cuponAplicado,
+  });
+  async function recalcular() {
+    const r = await api("presupuesto.php", { metodo: "POST", cuerpo: cuerpoPresupuesto() });
+    if (!r.ok) {
+      if (cuponAplicado) { marcarError(cupon, mensajeDe(r, "El código no es válido.")); cuponAplicado = ""; return recalcular(); }
+      resumen.replaceChildren(el("p", { texto: mensajeDe(r, "No se pudo calcular el total.") }));
+      return;
+    }
+    const d = r.datos.data;
+    resumen.replaceChildren(el("dl", {},
+      el("dt", { texto: "Subtotal" }), el("dd", { texto: dinero(d.subtotal) }),
+      el("dt", { texto: `Descuento por volumen (${d.viajes} ${d.viajes === 1 ? "viaje" : "viajes"})` }), el("dd", { texto: porcentaje(d.pct_volumen) }),
+      el("dt", { texto: "Descuento por cupón" }), el("dd", { texto: porcentaje(d.pct_cupon) }),
+      el("dt", { class: "total", texto: "Total estimado" }), el("dd", { class: "total", texto: dinero(d.total) })));
+  }
+
+  const aplicar = () => {
+    limpiarError(cupon);
+    cuponAplicado = cupon.control.value.trim().toUpperCase();
+    recalcular();
+  };
+
+  main.append(
+    el("section", { "aria-labelledby": "titulo-unidades-pedido" },
+      el("h2", { id: "titulo-unidades-pedido", texto: "Unidades elegidas" }), listaLineas),
+    el("section", { "aria-labelledby": "titulo-total" },
+      el("h2", { id: "titulo-total", texto: "Total" }),
+      el("div", { class: "filtros" }, cupon.contenedor,
+        el("button", { type: "button", class: "boton boton-oscuro", on: { click: aplicar }, texto: "Aplicar código" })),
+      resumen));
+  dibujarLineas();
+  await recalcular();
+
+  // ----- Datos de entrega -----
+  if (!estado.usuario) {
+    main.append(el("section", { "aria-labelledby": "titulo-entrega" },
+      el("h2", { id: "titulo-entrega", texto: "Datos de entrega" }),
+      el("p", {}, "Para enviar el pedido necesitás una cuenta. Tus unidades elegidas se conservan mientras no cierres la pestaña."),
+      el("a", { class: "boton", href: "#/acceso", on: { click: () => { estado.destino = "#/pedido"; estado.avisoAcceso = "Ingresá para terminar tu pedido."; } }, texto: "Ingresar o crear cuenta" })));
+    return;
+  }
+
+  const direccion = crearCampo("direccion", "Dirección de entrega", { autocomplete: "street-address", maxlength: 200, ayuda: "Calle, número y localidad de la obra." });
+  const telefono = crearCampo("telefono", "Teléfono de contacto", { tipo: "tel", autocomplete: "tel", maxlength: 30, valor: estado.usuario.telefono || "", inputmode: "tel" });
+  const medio = crearCampo("medio_pago", "Medio de pago", { elemento: "select", opciones: [
+    { valor: "", texto: "Elegí una opción" }, ...["Efectivo", "Transferencia bancaria", "Tarjeta de débito/crédito", "Cheque"].map((m) => ({ valor: m, texto: m }))] });
+  const comentarios = crearCampo("comentarios", "Comentarios", { elemento: "textarea", requerido: false, maxlength: 500, ayuda: "Horarios, accesos, referencias para el chofer." });
+  const enviar = el("button", { type: "submit", class: "boton", texto: "Enviar pedido" });
+  const campos = [direccion, telefono, medio];
+
+  const formulario = el("form", { class: "formulario", novalidate: true, "aria-labelledby": "titulo-entrega", on: { submit: async (e) => {
+    e.preventDefault();
+    limpiarAviso(avisoPedido);
+    if (!validarCampos(campos)) { mostrarAviso(avisoPedido, "Revisá los campos marcados antes de enviar.", "error"); return; }
+    enviar.setAttribute("aria-disabled", "true");
+    const r = await api("pedidos.php", { metodo: "POST", cuerpo: {
+      ...cuerpoPresupuesto(), direccion: direccion.control.value, telefono: telefono.control.value,
+      medio_pago: medio.control.value, comentarios: comentarios.control.value } });
+    enviar.removeAttribute("aria-disabled");
+    if (!r.ok) {
+      if (r.status !== 401) mostrarAviso(avisoPedido, mensajeDe(r, "No se pudo registrar el pedido."), "error", true);
+      return;
+    }
+    const d = r.datos.data;
+    estado.carrito.clear(); actualizarMenu();
+    main.replaceChildren(el("h1", { texto: "¡Pedido registrado!" }));
+    const ok = crearAviso("aviso-pedido-ok");
+    main.append(ok, el("div", { class: "acciones" },
+      el("a", { class: "boton", href: "#/mis-pedidos", texto: "Ver mis pedidos" }),
+      el("a", { class: "boton boton-claro", href: "#/catalogo", texto: "Seguir mirando unidades" })));
+    mostrarAviso(ok, `Tu pedido número ${d.id} quedó pendiente de confirmación. Total: ${dinero(d.total)}.`, "ok", true);
+  } } },
+    el("h2", { id: "titulo-entrega", texto: "Datos de entrega" }),
+    direccion.contenedor, telefono.contenedor, medio.contenedor, comentarios.contenedor,
+    avisoPedido, el("div", { class: "acciones" }, enviar));
+  main.append(el("section", {}, formulario));
 }
 
 /* ===================== 6. ARRANQUE ===================== */
