@@ -188,6 +188,7 @@ const RUTAS = [
   { patron: /^#\/pedido$/,            titulo: "Pedir un camión",      vista: vistaPedido },
   { patron: /^#\/acceso$/,            titulo: "Ingresar o crear cuenta", vista: vistaAcceso },
   { patron: /^#\/mis-pedidos$/,       titulo: "Mis pedidos",          vista: vistaMisPedidos, roles: ["cliente", "operario", "gerente"] },
+  { patron: /^#\/operacion$/,         titulo: "Operación",            vista: vistaOperacion, roles: ROL_STAFF },
 ];
 
 function actualizarMenu() {
@@ -619,6 +620,150 @@ async function vistaMisPedidos(main) {
     if (focoId) (lista.querySelector(`[data-foco="${focoId}"]`) || aviso).focus?.();
   }
   await cargar();
+}
+
+/* ---------- Operación (operario / gerente): pedidos y flota ---------- */
+const SIGUIENTE = {
+  "pendiente": [["confirmado", "Confirmar"], ["cancelado", "Cancelar"]],
+  "confirmado": [["en viaje", "Marcar en viaje"], ["cancelado", "Cancelar"]],
+  "en viaje": [["entregado", "Marcar entregado"]],
+};
+
+async function vistaOperacion(main) {
+  main.append(el("h1", { texto: "Operación" }));
+
+  /* ----- Pedidos ----- */
+  const avisoPed = crearAviso("aviso-operacion-pedidos");
+  const filtro = crearCampo("filtro-estado", "Mostrar pedidos en estado", { elemento: "select", requerido: false, opciones: [
+    { valor: "", texto: "Todos" }, ...["pendiente", "confirmado", "en viaje", "entregado", "cancelado"].map((e) => ({ valor: e, texto: e }))] });
+  const tablaPed = el("div", { id: "tabla-pedidos", class: "tabla-envoltorio" });
+
+  async function cargarPedidos(focoId) {
+    tablaPed.setAttribute("aria-busy", "true");
+    const e = filtro.control.value;
+    const r = await api("pedidos.php?todos=1" + (e ? "&estado=" + encodeURIComponent(e) : ""));
+    tablaPed.removeAttribute("aria-busy");
+    if (!r.ok) { if (r.status !== 401) mostrarAviso(avisoPed, mensajeDe(r, "No se pudieron cargar los pedidos."), "error"); return; }
+    const pedidos = r.datos.data;
+    if (!pedidos.length) { tablaPed.replaceChildren(el("p", { class: "panel", texto: "No hay pedidos con ese estado." })); return; }
+    tablaPed.replaceChildren(el("table", {},
+      el("caption", { texto: "Pedidos de los clientes" }),
+      el("thead", {}, el("tr", {}, ["N.º", "Cliente y detalle", "Fecha", "Estado", "Total", "Acciones"].map((t) => el("th", { scope: "col", class: t === "Total" ? "num" : null, texto: t })))),
+      el("tbody", {}, pedidos.map((p) => el("tr", {},
+        el("th", { scope: "row", texto: String(p.id) }),
+        el("td", {}, el("strong", { texto: p.cliente }), ...detallePedido(p)),
+        el("td", { texto: fecha(p.creado_en) }),
+        el("td", {}, etiquetaEstado(p.estado)),
+        el("td", { class: "num", texto: dinero(p.total) }),
+        el("td", {}, el("div", { class: "acciones" }, (SIGUIENTE[p.estado] || []).map(([nuevo, texto], i) =>
+          el("button", { type: "button", class: "boton boton-chico " + (nuevo === "cancelado" ? "boton-peligro" : ""), "data-foco": i === 0 ? `ped-${p.id}` : null,
+            on: { click: async () => {
+              const rc = await api("pedidos.php?id=" + p.id, { metodo: "PUT", cuerpo: { estado: nuevo } });
+              if (rc.status === 401) return;
+              mostrarAviso(avisoPed, rc.ok ? `Pedido ${p.id}: ahora está «${nuevo}».` : mensajeDe(rc, "No se pudo actualizar el pedido."), rc.ok ? "ok" : "error");
+              await cargarPedidos(`ped-${p.id}`);
+            } } }, texto, soloLectores(` (pedido ${p.id})`))))))))));
+    if (focoId) (tablaPed.querySelector(`[data-foco="${focoId}"]`) || avisoPed).focus?.();
+  }
+  filtro.control.addEventListener("change", () => cargarPedidos());
+
+  /* ----- Flota ----- */
+  const avisoFlota = crearAviso("aviso-operacion-flota");
+  const tablaFlota = el("div", { id: "tabla-flota", class: "tabla-envoltorio" });
+  let editando = null;   // id de la unidad en edición o null
+
+  const f = {
+    id: crearCampo("u-id", "Identificador", { maxlength: 40, ayuda: "Minúsculas, números y guiones. No se puede cambiar después." }),
+    nombre: crearCampo("u-nombre", "Nombre", { maxlength: 100 }),
+    categoria: crearCampo("u-categoria", "Categoría", { maxlength: 50 }),
+    capacidad: crearCampo("u-capacidad", "Capacidad", { maxlength: 60 }),
+    carga: crearCampo("u-carga", "Carga máxima", { maxlength: 40 }),
+    uso: crearCampo("u-uso", "Uso recomendado", { maxlength: 200 }),
+    precio: crearCampo("u-precio", "Precio", { tipo: "number", min: 1, inputmode: "decimal" }),
+    tarifa: crearCampo("u-tarifa", "Tarifa", { maxlength: 60, ayuda: "Por ejemplo: por viaje, por km, por media jornada." }),
+  };
+  f.id.control.pattern = "[a-z0-9]+(-[a-z0-9]+)*";
+  f.id.control.title = "Minúsculas, números y guiones";
+  f.precio.control.step = "any";
+  const titulo = el("h3", { id: "titulo-form-flota", texto: "Agregar una unidad" });
+  const guardar = el("button", { type: "submit", class: "boton", texto: "Guardar unidad" });
+  const cancelarEdicion = el("button", { type: "button", class: "boton boton-claro", hidden: true, texto: "Cancelar edición" });
+  const avisoForm = crearAviso("aviso-form-flota");
+
+  function salirDeEdicion() {
+    editando = null;
+    for (const c of Object.values(f)) { c.control.value = ""; limpiarError(c); }
+    f.id.control.disabled = false;
+    titulo.textContent = "Agregar una unidad";
+    cancelarEdicion.hidden = true;
+  }
+  cancelarEdicion.addEventListener("click", () => { salirDeEdicion(); f.id.control.focus(); });
+
+  function empezarEdicion(u) {
+    editando = u.id;
+    f.id.control.value = u.id; f.id.control.disabled = true;
+    f.nombre.control.value = u.nombre; f.categoria.control.value = u.categoria; f.capacidad.control.value = u.capacidad;
+    f.carga.control.value = u.carga_maxima; f.uso.control.value = u.uso; f.precio.control.value = u.precio; f.tarifa.control.value = u.tarifa;
+    titulo.textContent = `Editando: ${u.nombre}`;
+    cancelarEdicion.hidden = false;
+    limpiarAviso(avisoForm);
+    f.nombre.control.focus();
+  }
+
+  async function cargarFlota(focoId) {
+    tablaFlota.setAttribute("aria-busy", "true");
+    const r = await api("unidades.php?todas=1");
+    tablaFlota.removeAttribute("aria-busy");
+    if (!r.ok) { if (r.status !== 401) mostrarAviso(avisoFlota, mensajeDe(r, "No se pudo cargar la flota."), "error"); return; }
+    tablaFlota.replaceChildren(el("table", {},
+      el("caption", { texto: "Flota de GaMa (incluye unidades dadas de baja)" }),
+      el("thead", {}, el("tr", {}, ["Unidad", "Categoría", "Precio", "Estado", "Acciones"].map((t) => el("th", { scope: "col", class: t === "Precio" ? "num" : null, texto: t })))),
+      el("tbody", {}, r.datos.data.map((u) => el("tr", {},
+        el("th", { scope: "row", texto: u.nombre }), el("td", { texto: u.categoria }),
+        el("td", { class: "num", texto: dinero(u.precio) }), el("td", { texto: u.activo ? "Disponible" : "De baja" }),
+        el("td", {}, el("div", { class: "acciones" },
+          el("button", { type: "button", class: "boton boton-chico", "data-foco": `uni-${u.id}`, on: { click: () => empezarEdicion(u) } }, "Editar", soloLectores(`: ${u.nombre}`)),
+          el("button", { type: "button", class: "boton boton-chico " + (u.activo ? "boton-peligro" : "boton-oscuro"), on: { click: async () => {
+            const rc = u.activo
+              ? await api("unidades.php?id=" + encodeURIComponent(u.id), { metodo: "DELETE" })
+              : await api("unidades.php?id=" + encodeURIComponent(u.id), { metodo: "PUT", cuerpo: {
+                  nombre: u.nombre, categoria: u.categoria, capacidad: u.capacidad, carga_maxima: u.carga_maxima,
+                  uso: u.uso, precio: u.precio, tarifa: u.tarifa, activo: true } });
+            if (rc.status === 401) return;
+            mostrarAviso(avisoFlota, rc.ok ? `${u.nombre}: ${u.activo ? "dada de baja" : "reactivada"}.` : mensajeDe(rc, "No se pudo actualizar la unidad."), rc.ok ? "ok" : "error");
+            await cargarFlota(`uni-${u.id}`);
+          } } }, u.activo ? "Dar de baja" : "Reactivar", soloLectores(`: ${u.nombre}`)))))))));
+    if (focoId) (tablaFlota.querySelector(`[data-foco="${focoId}"]`) || avisoFlota).focus?.();
+  }
+
+  const camposForm = Object.values(f);
+  const formFlota = el("form", { class: "formulario panel", novalidate: true, "aria-labelledby": "titulo-form-flota", on: { submit: async (e) => {
+    e.preventDefault(); limpiarAviso(avisoForm);
+    const aValidar = editando ? camposForm.filter((c) => c !== f.id) : camposForm;
+    if (!validarCampos(aValidar)) return;
+    const cuerpo = {
+      id: f.id.control.value.trim(), nombre: f.nombre.control.value, categoria: f.categoria.control.value,
+      capacidad: f.capacidad.control.value, carga_maxima: f.carga.control.value, uso: f.uso.control.value,
+      precio: Number(f.precio.control.value), tarifa: f.tarifa.control.value,
+    };
+    const r = editando
+      ? await api("unidades.php?id=" + encodeURIComponent(editando), { metodo: "PUT", cuerpo })
+      : await api("unidades.php", { metodo: "POST", cuerpo });
+    if (!r.ok) { if (r.status !== 401) mostrarAviso(avisoForm, mensajeDe(r, "No se pudo guardar la unidad."), "error", true); return; }
+    const id = r.datos.data.id;
+    mostrarAviso(avisoFlota, `${r.datos.data.nombre}: ${editando ? "datos actualizados" : "unidad creada"}.`, "ok");
+    salirDeEdicion();
+    await cargarFlota(`uni-${id}`);
+  } } },
+    titulo, ...camposForm.map((c) => c.contenedor), avisoForm,
+    el("div", { class: "acciones" }, guardar, cancelarEdicion));
+
+  main.append(
+    el("section", { class: "seccion", "aria-labelledby": "titulo-op-pedidos" },
+      el("h2", { id: "titulo-op-pedidos", texto: "Pedidos de los clientes" }), filtro.contenedor, avisoPed, tablaPed),
+    el("section", { class: "seccion", "aria-labelledby": "titulo-op-flota" },
+      el("h2", { id: "titulo-op-flota", texto: "Flota" }), avisoFlota, tablaFlota, formFlota));
+  await Promise.all([cargarPedidos(), cargarFlota()]);
 }
 
 /* ===================== 6. ARRANQUE ===================== */
