@@ -186,6 +186,7 @@ const RUTAS = [
   { patron: /^#\/catalogo$/,          titulo: "Unidades disponibles", vista: vistaCatalogo },
   { patron: /^#\/unidad\/([a-z0-9-]+)$/, titulo: "Ficha de la unidad", vista: vistaUnidad },
   { patron: /^#\/pedido$/,            titulo: "Pedir un camión",      vista: vistaPedido },
+  { patron: /^#\/acceso$/,            titulo: "Ingresar o crear cuenta", vista: vistaAcceso },
 ];
 
 function actualizarMenu() {
@@ -514,6 +515,59 @@ async function vistaPedido(main) {
     direccion.contenedor, telefono.contenedor, medio.contenedor, comentarios.contenedor,
     avisoPedido, el("div", { class: "acciones" }, enviar));
   main.append(el("section", {}, formulario));
+}
+
+/* ---------- Acceso: ingreso y registro ---------- */
+function vistaAcceso(main) {
+  main.append(el("h1", { texto: "Ingresar o crear cuenta" }));
+  if (estado.usuario) {
+    main.append(el("p", {}, `Ya iniciaste sesión como ${estado.usuario.nombre}.`),
+      el("div", { class: "acciones" }, el("button", { type: "button", class: "boton", on: { click: cerrarSesion }, texto: "Cerrar sesión" })));
+    return;
+  }
+  const avisoGeneral = crearAviso("aviso-acceso");
+  if (estado.avisoAcceso) { mostrarAviso(avisoGeneral, estado.avisoAcceso); estado.avisoAcceso = ""; }
+
+  async function entrar(r, aviso) {
+    if (!r.ok) { mostrarAviso(aviso, mensajeDe(r, "No se pudo completar la operación."), "error", true); return; }
+    estado.usuario = r.datos.usuario; estado.csrf = r.datos.csrf;
+    actualizarMenu();
+    anunciar(`Ingresaste como ${estado.usuario.nombre}.`);
+    const destino = estado.destino || "#/"; estado.destino = null;
+    if (location.hash === destino) navegar(); else location.hash = destino;
+  }
+
+  // --- Ingreso ---
+  const lEmail = crearCampo("login-email", "Correo electrónico", { tipo: "email", autocomplete: "username", maxlength: 150 });
+  const lClave = crearCampo("login-clave", "Contraseña", { tipo: "password", autocomplete: "current-password", maxlength: 72 });
+  const avisoLogin = crearAviso("aviso-login");
+  const formLogin = el("form", { class: "formulario", novalidate: true, "aria-labelledby": "titulo-login", on: { submit: async (e) => {
+    e.preventDefault(); limpiarAviso(avisoLogin);
+    if (!validarCampos([lEmail, lClave])) return;
+    entrar(await api("login.php", { metodo: "POST", cuerpo: { email: lEmail.control.value, password: lClave.control.value } }), avisoLogin);
+  } } },
+    el("h2", { id: "titulo-login", texto: "Ya tengo cuenta" }), lEmail.contenedor, lClave.contenedor, avisoLogin,
+    el("div", { class: "acciones" }, el("button", { type: "submit", class: "boton", texto: "Ingresar" })));
+
+  // --- Registro ---
+  const rNombre = crearCampo("reg-nombre", "Nombre o razón social", { autocomplete: "name", maxlength: 100 });
+  const rEmail = crearCampo("reg-email", "Correo electrónico", { tipo: "email", autocomplete: "email", maxlength: 150 });
+  const rTel = crearCampo("reg-telefono", "Teléfono", { tipo: "tel", autocomplete: "tel", maxlength: 30, inputmode: "tel" });
+  const rClave = crearCampo("reg-clave", "Contraseña", { tipo: "password", autocomplete: "new-password", maxlength: 72, ayuda: "Entre 8 y 72 caracteres." });
+  rNombre.control.minLength = 3; rClave.control.minLength = 8;
+  rTel.control.pattern = "[0-9 +()\\-]{6,30}";
+  rTel.control.title = "Solo números, espacios, +, ( ) y guiones";
+  const avisoReg = crearAviso("aviso-registro");
+  const formReg = el("form", { class: "formulario", novalidate: true, "aria-labelledby": "titulo-registro", on: { submit: async (e) => {
+    e.preventDefault(); limpiarAviso(avisoReg);
+    if (!validarCampos([rNombre, rEmail, rTel, rClave])) return;
+    entrar(await api("registro.php", { metodo: "POST", cuerpo: {
+      nombre: rNombre.control.value, email: rEmail.control.value, telefono: rTel.control.value, password: rClave.control.value } }), avisoReg);
+  } } },
+    el("h2", { id: "titulo-registro", texto: "Soy nuevo" }), rNombre.contenedor, rEmail.contenedor, rTel.contenedor, rClave.contenedor, avisoReg,
+    el("div", { class: "acciones" }, el("button", { type: "submit", class: "boton boton-oscuro", texto: "Crear cuenta" })));
+
+  main.append(avisoGeneral, el("div", { class: "dos-columnas" }, el("div", { class: "panel" }, formLogin), el("div", { class: "panel" }, formReg)));
 }
 
 /* ===================== 6. ARRANQUE ===================== */
