@@ -93,3 +93,37 @@ Las escrituras (`POST`, `PUT`, `DELETE`) exigen la cabecera `X-CSRF-Token`, salv
 - **A07 Autenticación:** `session_regenerate_id(true)` al ingresar, cookie `HttpOnly` y `SameSite`, cierre por 30 minutos de inactividad, token CSRF en las escrituras y bloqueo (429) tras 5 intentos fallidos.
 - **A05/A09:** un `set_exception_handler` global evita que un error filtre rutas, usuarios o consultas.
 - Las carpetas `config/`, `models/`, `services/`, `sql/` y `tests/` traen un `.htaccess` que impide abrirlas desde el navegador.
+
+## Cómo ejecutarlo en XAMPP
+
+Probado con Apache 2.4 y PHP 8.0 (los de XAMPP).
+
+1. **Iniciá XAMPP** y activá los módulos **Apache** y **MySQL** desde el panel de control.
+2. **Copiá el proyecto** completo en `C:\xampp\htdocs\gama` (la carpeta tiene que llamarse `gama`).
+3. **Creá la base de datos.** Abrí `http://localhost/phpmyadmin`, entrá en la pestaña **Importar**, elegí el archivo `sql/gama.sql` y presioná **Importar**. El script crea la base `gama`, las tablas y los datos de prueba. Se puede importar más de una vez sin duplicar nada.
+4. **Revisá la conexión.** `config/conexion.php` usa por defecto el usuario `root` sin contraseña, que es lo que trae XAMPP. Si tu MySQL tiene contraseña, definila en la variable de entorno `GAMA_DB_PASS` o cambiala en ese archivo.
+5. **Abrí la aplicación** en `http://localhost/gama/` (redirige a `http://localhost/gama/public/`).
+
+### Cuentas de prueba
+
+| Rol | Correo | Contraseña |
+| :--- | :--- | :--- |
+| Cliente | `obras.lopez@gama.com` | `volcador2026` |
+| Operario | `despacho@gama.com` | `hormigon2026` |
+| Gerente | `gerencia@gama.com` | `gerente2026` |
+
+Cualquier persona que se registre desde la página queda siempre como **cliente**: el rol lo decide el servidor.
+
+## Cómo probarlo
+
+**Pruebas de la API.** Hace falta Python 3. Si además `mysql` y `php` están en el PATH, se suman tres verificaciones que consultan la base y el manejo de errores internos; si no están, esas pruebas se informan como omitidas. Desde la carpeta del proyecto y con la base recién importada:
+
+```
+python tests/test_api.py http://localhost/gama
+```
+
+Cada prueba verifica el código HTTP y el contenido de la respuesta (accesos sin sesión, roles, inyección SQL, token CSRF, BCRYPT, cálculo de descuentos). Las pruebas crean datos, así que para repetirlas hay que volver a importar `sql/gama.sql`.
+
+**Accesibilidad con Lighthouse.** En Chrome abrí `http://localhost/gama/public/`, apretá `F12`, entrá en la pestaña **Lighthouse**, marcá solo **Accessibility** y presioná **Analyze page load**. Para las pantallas del operario y del gerente, ingresá primero con esa cuenta y repetí el análisis en cada vista.
+
+**Solo con teclado.** `Tab` avanza, `Shift + Tab` retrocede y `Enter` activa. El primer `Tab` muestra el enlace **Saltar al contenido principal**. Al cambiar de pantalla el foco pasa al título, y las cantidades de resultados, los errores y las confirmaciones se anuncian en regiones `aria-live="polite"`.
