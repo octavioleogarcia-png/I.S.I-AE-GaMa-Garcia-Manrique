@@ -187,6 +187,7 @@ const RUTAS = [
   { patron: /^#\/unidad\/([a-z0-9-]+)$/, titulo: "Ficha de la unidad", vista: vistaUnidad },
   { patron: /^#\/pedido$/,            titulo: "Pedir un camión",      vista: vistaPedido },
   { patron: /^#\/acceso$/,            titulo: "Ingresar o crear cuenta", vista: vistaAcceso },
+  { patron: /^#\/mis-pedidos$/,       titulo: "Mis pedidos",          vista: vistaMisPedidos, roles: ["cliente", "operario", "gerente"] },
 ];
 
 function actualizarMenu() {
@@ -568,6 +569,56 @@ function vistaAcceso(main) {
     el("div", { class: "acciones" }, el("button", { type: "submit", class: "boton boton-oscuro", texto: "Crear cuenta" })));
 
   main.append(avisoGeneral, el("div", { class: "dos-columnas" }, el("div", { class: "panel" }, formLogin), el("div", { class: "panel" }, formReg)));
+}
+
+/* ---------- Mis pedidos ---------- */
+function detallePedido(p) {
+  return [
+    el("ul", { class: "items" }, p.items.map((i) => el("li", { texto: `${i.cantidad} × ${i.unidad} — ${dinero(i.precio_unitario)} ${i.tarifa}` }))),
+    el("p", { class: "ayuda", texto: `Entrega en ${p.direccion} · Pago: ${p.medio_pago}${p.cupon ? ` · Cupón ${p.cupon}` : ""}` }),
+  ];
+}
+const etiquetaEstado = (e) => el("span", { class: `estado estado-${e.replace(" ", "-")}`, texto: e });
+
+async function vistaMisPedidos(main) {
+  const aviso = crearAviso("aviso-mis-pedidos");
+  const lista = el("div", { id: "lista-mis-pedidos" });
+  main.append(el("h1", { texto: "Mis pedidos" }), aviso, lista);
+
+  async function cargar(focoId) {
+    lista.setAttribute("aria-busy", "true");
+    const r = await api("pedidos.php");
+    lista.removeAttribute("aria-busy");
+    if (!r.ok) { if (r.status !== 401) mostrarAviso(aviso, mensajeDe(r, "No se pudieron cargar tus pedidos."), "error"); return; }
+    const pedidos = r.datos.data;
+    if (!pedidos.length) {
+      lista.replaceChildren(el("p", {}, "Todavía no hiciste ningún pedido. ", el("a", { href: "#/catalogo", texto: "Mirá las unidades" }), "."));
+      return;
+    }
+    lista.replaceChildren(el("ul", { class: "lista-pedidos" }, pedidos.map((p) => {
+      const confirmar = el("div", { class: "acciones", hidden: true });
+      const pedirCancelar = el("button", { type: "button", class: "boton boton-peligro boton-chico", "data-foco": `pedido-${p.id}` }, "Cancelar pedido", soloLectores(` número ${p.id}`));
+      const si = el("button", { type: "button", class: "boton boton-peligro boton-chico" }, "Sí, cancelar", soloLectores(` pedido ${p.id}`));
+      const no = el("button", { type: "button", class: "boton boton-claro boton-chico" }, "No, mantenerlo", soloLectores(` (pedido ${p.id})`));
+      confirmar.append(el("span", { texto: "¿Seguro que querés cancelarlo?" }), si, no);
+      pedirCancelar.addEventListener("click", () => { pedirCancelar.hidden = true; confirmar.hidden = false; si.focus(); });
+      no.addEventListener("click", () => { confirmar.hidden = true; pedirCancelar.hidden = false; pedirCancelar.focus(); });
+      si.addEventListener("click", async () => {
+        const rc = await api("pedidos.php?id=" + p.id, { metodo: "DELETE" });
+        if (rc.status === 401) return;
+        mostrarAviso(aviso, rc.ok ? `Cancelaste el pedido número ${p.id}.` : mensajeDe(rc, "No se pudo cancelar el pedido."), rc.ok ? "ok" : "error");
+        await cargar(`pedido-${p.id}`);
+      });
+      return el("li", {}, el("article", { class: "pedido", "aria-labelledby": `pedido-t-${p.id}` },
+        el("header", {}, el("h2", { id: `pedido-t-${p.id}`, texto: `Pedido número ${p.id}` }), etiquetaEstado(p.estado)),
+        el("p", { class: "ayuda", texto: fecha(p.creado_en) }),
+        ...detallePedido(p),
+        el("p", {}, el("strong", { texto: `Total: ${dinero(p.total)}` }), p.descuento_pct > 0 ? ` (descuento ${porcentaje(p.descuento_pct)})` : ""),
+        p.estado === "pendiente" ? [pedirCancelar, confirmar] : null));
+    })));
+    if (focoId) (lista.querySelector(`[data-foco="${focoId}"]`) || aviso).focus?.();
+  }
+  await cargar();
 }
 
 /* ===================== 6. ARRANQUE ===================== */
