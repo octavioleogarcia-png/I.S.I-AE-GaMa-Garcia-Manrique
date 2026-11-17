@@ -167,3 +167,54 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 dl.datos { display: grid; grid-template-columns: 1fr; gap: .25rem 1rem; margin: 0 0 1rem; }
 dl.datos dt { font-weight: 700; }
 dl.datos dd { margin: 0 0 .5rem; }
+
+/* ---------- Pedido ---------- */
+.lineas { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .75rem; }
+.linea { display: grid; grid-template-columns: 1fr; gap: .5rem; align-items: center; padding: .75rem 1rem; background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); }
+.linea input { max-width: 7rem; }
+.resumen { background: var(--asfalto); color: var(--claro); border-radius: var(--radio); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.resumen dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: .25rem 1rem; }
+.resumen dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.resumen .total { font-size: 1.4rem; font-weight: 800; color: var(--amarillo); }
+
+/* ---------- Mis pedidos / operación ---------- */
+.lista-pedidos { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.pedido { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 1rem 1.25rem; }
+.pedido header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; align-items: baseline; margin-bottom: .5rem; }
+.pedido h3 { margin: 0; }
+.estado { display: inline-block; padding: .1rem .6rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 2px solid currentColor; }
+.estado-pendiente { color: #7a4b00; } .estado-confirmado { color: var(--acero); }
+.estado-en-viaje { color: #5b2d8c; } .estado-entregado { color: var(--verde); } .estado-cancelado { color: var(--herrumbre); }
+.items { margin: 0 0 .75rem; padding-left: 1.2rem; }
+.seccion { margin-top: 2.5rem; }
+
+/* ---------- Reportes ---------- */
+.tarjetas { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-top: 6px solid var(--amarillo); border-radius: var(--radio); padding: 1rem 1.25rem; }
+.tarjeta .valor { font-size: 1.8rem; font-weight: 800; margin: 0; }
+.tarjeta .nombre { margin: 0; color: var(--texto-suave); }
+
+.pie { background: var(--asfalto); color: #d9d4c4; padding-block: 1.25rem; font-size: .9rem; }
+.pie p { margin: .15rem 0; }
+
+/* ---------- Pantallas anchas ---------- */
+@media (min-width: 48rem) {
+  .modulos, .tarjetas { grid-template-columns: repeat(2, 1fr); }
+  .fichas { grid-template-columns: repeat(2, 1fr); }
+  .filtros { grid-template-columns: 2fr 1fr auto; }
+  .dos-columnas { grid-template-columns: 1fr 1fr; }
+  .linea { grid-template-columns: 1fr auto auto; }
+  dl.datos { grid-template-columns: 12rem 1fr; }
+}
+@media (min-width: 64rem) {
+  .modulos { grid-template-columns: repeat(4, 1fr); }
+  .tarjetas { grid-template-columns: repeat(3, 1fr); }
+  .fichas { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media print {
+  .encabezado, .franja-peligro, .pie, .saltar { display: none; }
+}
