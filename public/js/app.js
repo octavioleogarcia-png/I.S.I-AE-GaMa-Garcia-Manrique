@@ -184,6 +184,7 @@ function validarCampos(campos) {
 const RUTAS = [
   { patron: /^#\/?$/,                 titulo: "Inicio",               vista: vistaInicio },
   { patron: /^#\/catalogo$/,          titulo: "Unidades disponibles", vista: vistaCatalogo },
+  { patron: /^#\/unidad\/([a-z0-9-]+)$/, titulo: "Ficha de la unidad", vista: vistaUnidad },
 ];
 
 function actualizarMenu() {
@@ -363,6 +364,32 @@ function tablaDe(unidades) {
         el("td", { texto: u.carga_maxima }), el("td", { texto: u.tarifa }),
         el("td", { class: "num", texto: dinero(u.precio) }),
         el("td", {}, el("div", { class: "acciones" }, enlaceFicha(u), botonAgregar(u))))))));
+}
+
+/* ---------- Ficha individual ---------- */
+async function vistaUnidad(main, id) {
+  const aviso = crearAviso("aviso-unidad");
+  const contenido = el("div");
+  main.append(el("p", {}, el("a", { href: "#/catalogo", texto: "← Volver a las unidades" })), contenido, aviso);
+  const r = await api("unidades.php?id=" + encodeURIComponent(id));
+  if (!r.ok) {
+    document.title = "Unidad no encontrada — GaMa";
+    contenido.append(el("h1", { texto: r.status === 404 ? "Esa unidad no existe" : "No se pudo cargar la unidad" }));
+    mostrarAviso(aviso, mensajeDe(r, "Probá de nuevo más tarde."), "error");
+    return;
+  }
+  const u = r.datos.data;
+  document.title = `${u.nombre} — GaMa`;
+  contenido.append(
+    el("p", { class: "categoria", texto: u.categoria }),
+    el("h1", { texto: u.nombre }),
+    el("dl", { class: "datos" },
+      el("dt", { texto: "Uso recomendado" }), el("dd", { texto: u.uso }),
+      el("dt", { texto: "Capacidad" }), el("dd", { texto: u.capacidad }),
+      el("dt", { texto: "Carga máxima" }), el("dd", { texto: u.carga_maxima }),
+      el("dt", { texto: "Tarifa" }), el("dd", { texto: `${dinero(u.precio)} ${u.tarifa}` })),
+    el("div", { class: "acciones" }, botonAgregar(u),
+      el("a", { class: "boton boton-claro", href: "#/pedido", texto: "Ir al pedido" })));
 }
 
 /* ===================== 6. ARRANQUE ===================== */
