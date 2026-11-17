@@ -183,6 +183,7 @@ function validarCampos(campos) {
 
 const RUTAS = [
   { patron: /^#\/?$/,                 titulo: "Inicio",               vista: vistaInicio },
+  { patron: /^#\/catalogo$/,          titulo: "Unidades disponibles", vista: vistaCatalogo },
 ];
 
 function actualizarMenu() {
@@ -281,6 +282,87 @@ function vistaInicio(main) {
       el("h2", { id: "titulo-modulos", texto: "Qué podés hacer en GaMa" }),
       el("ul", { class: "modulos" }, modulos.map(([t, d]) =>
         el("li", { class: "modulo" }, el("h3", { texto: t }), el("p", { texto: d }))))));
+}
+
+/* ---------- Catálogo (tabla y fichas) ---------- */
+async function vistaCatalogo(main) {
+  let modo = "fichas";
+  const buscar = crearCampo("busqueda", "Buscar por nombre o uso", { tipo: "search", requerido: false, autocomplete: "off", maxlength: 60 });
+  const categoria = crearCampo("categoria", "Categoría", { elemento: "select", requerido: false, opciones: [{ valor: "", texto: "Todas" }] });
+  const btnFichas = el("button", { type: "button", class: "boton boton-claro", "aria-pressed": "true", texto: "Fichas" });
+  const btnTabla = el("button", { type: "button", class: "boton boton-claro", "aria-pressed": "false", texto: "Tabla" });
+  const aviso = crearAviso("aviso-catalogo");     // región viva: cantidad de resultados / errores
+  const resultado = el("div", { id: "resultado-catalogo" });
+  let unidades = [];
+
+  function dibujar() {
+    if (!unidades.length) { resultado.replaceChildren(); return; }
+    resultado.replaceChildren(modo === "fichas" ? fichasDe(unidades) : tablaDe(unidades));
+  }
+  async function cargar() {
+    resultado.setAttribute("aria-busy", "true");
+    mostrarAviso(aviso, "Buscando unidades…");
+    const params = new URLSearchParams();
+    if (buscar.control.value.trim()) params.set("q", buscar.control.value.trim());
+    if (categoria.control.value) params.set("categoria", categoria.control.value);
+    const r = await api("unidades.php" + (params.toString() ? "?" + params : ""));
+    resultado.removeAttribute("aria-busy");
+    if (!r.ok) { unidades = []; dibujar(); mostrarAviso(aviso, mensajeDe(r, "No se pudieron cargar las unidades."), "error"); return; }
+    unidades = r.datos.data;
+    // Las categorías se cargan una sola vez, sin pisar la elegida.
+    if (categoria.control.options.length === 1) {
+      for (const c of r.datos.categorias) categoria.control.append(el("option", { value: c, texto: c }));
+    }
+    dibujar();
+    mostrarAviso(aviso, unidades.length === 0 ? "No se encontraron unidades para esa búsqueda."
+      : `${unidades.length} ${unidades.length === 1 ? "unidad encontrada" : "unidades encontradas"}.`);
+  }
+
+  btnFichas.addEventListener("click", () => { modo = "fichas"; btnFichas.setAttribute("aria-pressed", "true"); btnTabla.setAttribute("aria-pressed", "false"); dibujar(); });
+  btnTabla.addEventListener("click", () => { modo = "tabla"; btnTabla.setAttribute("aria-pressed", "true"); btnFichas.setAttribute("aria-pressed", "false"); dibujar(); });
+  buscar.control.addEventListener("input", debounce(cargar, 300));
+  categoria.control.addEventListener("change", cargar);
+
+  main.append(
+    el("h1", { texto: "Unidades disponibles" }),
+    el("form", { class: "filtros", role: "search", "aria-label": "Filtrar unidades", on: { submit: (e) => { e.preventDefault(); cargar(); } } },
+      buscar.contenedor, categoria.contenedor,
+      el("div", { class: "vistas", role: "group", "aria-label": "Forma de mostrar" }, btnFichas, btnTabla)),
+    aviso, resultado);
+  await cargar();
+}
+
+function botonAgregar(u) {
+  return el("button", { type: "button", class: "boton boton-chico", on: { click: () => agregarAlCarrito(u) } },
+    "Agregar al pedido", soloLectores(`: ${u.nombre}`));
+}
+function enlaceFicha(u) {
+  return el("a", { class: "boton boton-claro boton-chico", href: `#/unidad/${u.id}` }, "Ver ficha", soloLectores(`: ${u.nombre}`));
+}
+
+function fichasDe(unidades) {
+  return el("ul", { class: "fichas" }, unidades.map((u) => el("li", {},
+    el("article", { class: "ficha", "aria-labelledby": `ficha-${u.id}` },
+      el("p", { class: "categoria", texto: u.categoria }),
+      el("h2", { id: `ficha-${u.id}`, texto: u.nombre }),
+      el("p", { texto: u.uso }),
+      el("p", { class: "ayuda", texto: `Capacidad ${u.capacidad} · Carga máxima ${u.carga_maxima}` }),
+      el("p", { class: "precio" }, dinero(u.precio), " ", el("small", { texto: u.tarifa })),
+      el("div", { class: "acciones" }, enlaceFicha(u), botonAgregar(u))))));
+}
+
+function tablaDe(unidades) {
+  const cabeza = ["Unidad", "Categoría", "Capacidad", "Carga máxima", "Tarifa", "Precio", "Acciones"];
+  return el("div", { class: "tabla-envoltorio" },
+    el("table", {},
+      el("caption", { texto: "Unidades de la flota GaMa" }),
+      el("thead", {}, el("tr", {}, cabeza.map((t) => el("th", { scope: "col", class: t === "Precio" ? "num" : null, texto: t })))),
+      el("tbody", {}, unidades.map((u) => el("tr", {},
+        el("th", { scope: "row", texto: u.nombre }),
+        el("td", { texto: u.categoria }), el("td", { texto: u.capacidad }),
+        el("td", { texto: u.carga_maxima }), el("td", { texto: u.tarifa }),
+        el("td", { class: "num", texto: dinero(u.precio) }),
+        el("td", {}, el("div", { class: "acciones" }, enlaceFicha(u), botonAgregar(u))))))));
 }
 
 /* ===================== 6. ARRANQUE ===================== */
