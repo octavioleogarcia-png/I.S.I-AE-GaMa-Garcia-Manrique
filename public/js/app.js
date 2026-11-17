@@ -70,3 +70,63 @@ function debounce(fn, ms) {
   let t;
   return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
 }
+
+/* ===================== 2. ESTADO Y API ===================== */
+
+const ROL_STAFF = ["operario", "gerente"];
+const estado = {
+  usuario: null,          // { nombre, email, telefono, rol } o null
+  csrf: "",               // token anti-CSRF de la sesión
+  carrito: new Map(),     // unidad_id → { unidad, cantidad }
+  destino: null,          // ruta a la que volver después de ingresar
+  avisoAcceso: "",
+};
+const esStaff = () => estado.usuario && ROL_STAFF.includes(estado.usuario.rol);
+
+// Único punto de contacto con el servidor. Nunca lanza: devuelve { ok, status, datos }.
+async function api(ruta, { metodo = "GET", cuerpo } = {}) {
+  const opciones = { method: metodo, headers: {}, credentials: "same-origin" };
+  if (cuerpo !== undefined) {
+    opciones.headers["Content-Type"] = "application/json";
+    opciones.body = JSON.stringify(cuerpo);
+  }
+  if (metodo !== "GET" && estado.csrf) opciones.headers["X-CSRF-Token"] = estado.csrf;
+
+  try {
+    const respuesta = await fetch("../api/" + ruta, opciones);
+    const datos = await respuesta.json().catch(() => ({}));
+    if (respuesta.status === 401 && estado.usuario) {
+      // La sesión venció mientras la página seguía abierta.
+      estado.usuario = null; estado.csrf = "";
+      estado.avisoAcceso = "Tu sesión venció. Ingresá de nuevo para continuar.";
+      estado.destino = location.hash;
+      actualizarMenu();
+      location.hash = "#/acceso";
+    }
+    return { ok: respuesta.ok, status: respuesta.status, datos };
+  } catch (error) {
+    return { ok: false, status: 0, datos: { mensaje: "No se pudo conectar con el servidor. Revisá tu conexión e intentá de nuevo." } };
+  }
+}
+const mensajeDe = (r, porDefecto) => (r.datos && r.datos.mensaje) || porDefecto;
+
+async function cargarSesion() {
+  const r = await api("sesion.php");
+  if (r.ok && r.datos.autenticado) {
+    estado.usuario = r.datos.data;
+    estado.csrf = r.datos.csrf;
+  }
+}
+
+function totalItemsCarrito() {
+  let n = 0;
+  for (const { cantidad } of estado.carrito.values()) n += cantidad;
+  return n;
+}
+
+function agregarAlCarrito(unidad) {
+  const previo = estado.carrito.get(unidad.id);
+  estado.carrito.set(unidad.id, { unidad, cantidad: Math.min((previo ? previo.cantidad : 0) + 1, 100) });
+  actualizarMenu();
+  anunciar(`${unidad.nombre} agregado al pedido. Tenés ${totalItemsCarrito()} en total.`);
+}
