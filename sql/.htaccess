@@ -1,0 +1,2 @@
+# Nadie debe poder abrir estos archivos desde el navegador.
+Require all denied

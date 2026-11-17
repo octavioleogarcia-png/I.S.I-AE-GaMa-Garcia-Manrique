@@ -1,0 +1,446 @@
+{
+ "total": 88,
+ "fallas": 0,
+ "resultados": [
+  {
+   "prueba": "GET unidades → 200 y 6 unidades",
+   "ok": true,
+   "detalle": "200"
+  },
+  {
+   "prueba": "incluye lista de categorías",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "precio llega como número",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "filtro por categoría",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "búsqueda de texto",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'data': [{'id': 'mixer', 'nombre': 'Mixer Hormigonero', 'categoria': 'Servicio especial', 'capacidad': '6 m³', 'carga_maxima': '12.000 kg', 'uso': 'Entrega de hormigón elaborado en"
+  },
+  {
+   "prueba": "el % del usuario no actúa como comodín",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'data': [], 'categorias': ['Servicio especial', 'Transporte pesado', 'Volcador']}"
+  },
+  {
+   "prueba": "ficha de una unidad",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "unidad inexistente → 404",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "inyección SQL en id → 404, no 500",
+   "ok": true,
+   "detalle": "404"
+  },
+  {
+   "prueba": "?todas=1 anónimo → 401",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "método no permitido → 405",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "GET /pedidos.php sin sesión → 401",
+   "ok": true,
+   "detalle": "401"
+  },
+  {
+   "prueba": "GET /perfil.php sin sesión → 401",
+   "ok": true,
+   "detalle": "401"
+  },
+  {
+   "prueba": "GET /reportes.php sin sesión → 401",
+   "ok": true,
+   "detalle": "401"
+  },
+  {
+   "prueba": "POST /pedidos.php sin sesión → 401",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "POST /unidades.php sin sesión → 401",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "visitante: GET sesion.php → 200 con autenticado=false (sin error en consola)",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'autenticado': False}"
+  },
+  {
+   "prueba": "login sin datos → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "contraseña mala → 401",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "e-mail inexistente → 401 con el MISMO mensaje (no delata cuentas)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "inyección SQL en el login → 401, no 500",
+   "ok": true,
+   "detalle": "401"
+  },
+  {
+   "prueba": "login con formulario (no JSON) → 415",
+   "ok": true,
+   "detalle": "415"
+  },
+  {
+   "prueba": "GET /login.php → 405",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "visitante anónimo no recibe cookie de sesión",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "login correcto → 200 con rol cliente",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Autenticación exitosa.', 'csrf': 'bc47d628313c33c172f6739f5eabb22f23c0205fa9dba41bda603488e188afa8', 'usuario': {'nombre': 'Constructora López', 'email': 'obras.lopez@g"
+  },
+  {
+   "prueba": "la respuesta nunca incluye el hash",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "devuelve token CSRF de 64 caracteres",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "logueado: sesion.php → autenticado=true con rol y CSRF",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'autenticado': True, 'data': {'nombre': 'Constructora López', 'email': 'obras.lopez@gama.com', 'telefono': '376 4123456', 'rol': 'cliente'}, 'csrf': 'bc47d628313c33c172f6739f5eabb2"
+  },
+  {
+   "prueba": "perfil con sesión → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "session_regenerate_id: el ID de sesión cambia al autenticarse",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "contraseña guardada con BCRYPT costo 12 (60 caracteres)",
+   "ok": true,
+   "detalle": "$2y$12$8Sfsp"
+  },
+  {
+   "prueba": "columna password es VARCHAR(255)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "registro con datos inválidos → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "registro correcto → 201",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Cuenta creada correctamente.', 'csrf': 'd8ef2ac9c7944e322c8bf779ea73d72cc418ecb1e227c53281123ceaf4cc6852', 'usuario': {'nombre': 'Marta Test', 'email': 'marta@test.com'"
+  },
+  {
+   "prueba": "aunque mande rol=gerente, queda como cliente",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "e-mail repetido → 409",
+   "ok": true,
+   "detalle": "{'estado': 'error', 'mensaje': 'Ya existe una cuenta con ese e-mail.'}"
+  },
+  {
+   "prueba": "5 mixer + UCP10 → 20 % y total 380.000",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'data': {'viajes': 5, 'subtotal': 475000, 'pct_volumen': 10, 'pct_cupon': 10, 'descuento_pct': 20, 'total': 380000}}"
+  },
+  {
+   "prueba": "1 mixer sin descuento → 95.000",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cupón inexistente → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "unidad inexistente → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cantidad 0 → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "11 viajes → 15 % por volumen",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'data': {'viajes': 11, 'subtotal': 1045000, 'pct_volumen': 15, 'pct_cupon': 0, 'descuento_pct': 15, 'total': 888250}}"
+  },
+  {
+   "prueba": "POST pedidos sin token CSRF → 403",
+   "ok": true,
+   "detalle": "403"
+  },
+  {
+   "prueba": "pedido correcto → 201",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Pedido registrado.', 'data': {'id': 1, 'subtotal': 90000, 'descuento_pct': 0, 'total': 90000, 'estado': 'pendiente'}}"
+  },
+  {
+   "prueba": "el precio que manda el navegador se ignora (2 × 45.000)",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Pedido registrado.', 'data': {'id': 1, 'subtotal': 90000, 'descuento_pct': 0, 'total': 90000, 'estado': 'pendiente'}}"
+  },
+  {
+   "prueba": "medio de pago inválido → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "pedido sin ítems → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "texto con SQL se guarda como texto (201) y no rompe nada",
+   "ok": true,
+   "detalle": "201"
+  },
+  {
+   "prueba": "GET pedidos → 200 con sus pedidos e ítems",
+   "ok": true,
+   "detalle": "200"
+  },
+  {
+   "prueba": "cliente con ?todos=1 → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "GET de un pedido propio → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "id no numérico → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "pedido ajeno → 404 (no revela que existe)",
+   "ok": true,
+   "detalle": "404"
+  },
+  {
+   "prueba": "cancelar pedido ajeno → 404",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operario ve todos los pedidos → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "filtro por estado",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "estado inválido → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cliente no puede cambiar estados → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "salto de estado pendiente→entregado → 409",
+   "ok": true,
+   "detalle": "{'estado': 'error', 'mensaje': 'No se puede pasar de «pendiente» a «.'}"
+  },
+  {
+   "prueba": "estado → confirmado → 200",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Estado actualizado.', 'data': {'id': 1, 'usuario_id': 1, 'cliente': 'Constructora López', 'cliente_email': 'obras.lopez@gama.com', 'direccion': 'Av. Mitre 1234, Posadas"
+  },
+  {
+   "prueba": "estado → en viaje → 200",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Estado actualizado.', 'data': {'id': 1, 'usuario_id': 1, 'cliente': 'Constructora López', 'cliente_email': 'obras.lopez@gama.com', 'direccion': 'Av. Mitre 1234, Posadas"
+  },
+  {
+   "prueba": "estado → entregado → 200",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Estado actualizado.', 'data': {'id': 1, 'usuario_id': 1, 'cliente': 'Constructora López', 'cliente_email': 'obras.lopez@gama.com', 'direccion': 'Av. Mitre 1234, Posadas"
+  },
+  {
+   "prueba": "cancelar un pedido ya entregado → 409",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "pedido inexistente → 404",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "el cliente cancela su pedido pendiente → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cancelar dos veces → 409",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cliente intenta crear unidad → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operario sin token CSRF → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operario crea unidad → 201",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Unidad creada.', 'data': {'id': 'camioneta-test', 'nombre': 'Camioneta de prueba', 'categoria': 'Servicio especial', 'capacidad': '2 m³', 'carga_maxima': '1.500 kg', 'u"
+  },
+  {
+   "prueba": "id repetido → 409",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "datos inválidos → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operario edita precio → 200",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'mensaje': 'Unidad actualizada.', 'data': {'id': 'camioneta-test', 'nombre': 'Camioneta de prueba', 'categoria': 'Servicio especial', 'capacidad': '2 m³', 'carga_maxima': '1.500 kg"
+  },
+  {
+   "prueba": "editar inexistente → 404",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "baja lógica → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "unidad dada de baja ya no aparece en el catálogo público (404)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "el personal sí la ve con ?todas=1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "no se puede pedir una unidad dada de baja → 400",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "reactivar con activo=true",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operario no ve reportes → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "cliente no ve reportes → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "gerente ve reportes → 200",
+   "ok": true,
+   "detalle": "{'estado': 'exito', 'data': {'totales': {'pedidos': 3, 'ingresos': 180000, 'ticket_promedio': 90000}, 'por_estado': [{'estado': 'entregado', 'cantidad': 1}, {'estado': 'pendiente', 'cantidad': 1}, {'e"
+  },
+  {
+   "prueba": "los cancelados no suman ingresos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "6.º intento fallido seguido → 429",
+   "ok": true,
+   "detalle": "429"
+  },
+  {
+   "prueba": "logout sin token CSRF → 403",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "logout → 200",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "después de salir, perfil → 401",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "base inaccesible → 500 genérico",
+   "ok": true,
+   "detalle": "(500, '{\"estado\": \"error\", \"mensaje\": \"Error interno del servidor.\"}')"
+  },
+  {
+   "prueba": "el 500 no filtra SQLSTATE, usuario, host ni rutas",
+   "ok": true,
+   "detalle": "{\"estado\": \"error\", \"mensaje\": \"Error interno del servidor.\"}"
+  }
+ ]
+}
