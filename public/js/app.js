@@ -130,3 +130,51 @@ function agregarAlCarrito(unidad) {
   actualizarMenu();
   anunciar(`${unidad.nombre} agregado al pedido. Tenés ${totalItemsCarrito()} en total.`);
 }
+
+/* ===================== 3. FORMULARIOS ===================== */
+
+// Campo accesible: etiqueta asociada, ayuda y error enlazados con aria-describedby.
+function crearCampo(id, etiqueta, { tipo = "text", requerido = true, ayuda = "", valor = "", autocomplete = "", maxlength, min, max, inputmode, elemento = "input", opciones = [] } = {}) {
+  const idAyuda = `${id}-ayuda`, idError = `${id}-error`;
+  let control;
+  if (elemento === "select") {
+    control = el("select", { id, name: id, required: requerido }, opciones.map((o) => el("option", { value: o.valor, texto: o.texto })));
+    control.value = valor;
+  } else if (elemento === "textarea") {
+    control = el("textarea", { id, name: id, maxlength, rows: 3 });
+    control.value = valor;
+  } else {
+    control = el("input", { id, name: id, type: tipo, required: requerido, autocomplete, maxlength, min, max, inputmode, value: valor });
+  }
+  const error = el("p", { id: idError, class: "error-campo", "aria-live": "polite" });
+  const descripciones = [];
+  if (ayuda) descripciones.push(idAyuda);
+  control.setAttribute("aria-describedby", descripciones.concat(idError).join(" "));
+  const contenedor = el("div", { class: "campo" },
+    el("label", { for: id }, etiqueta, requerido ? "" : " (opcional)"),
+    ayuda ? el("span", { id: idAyuda, class: "ayuda", texto: ayuda }) : null,
+    control, error);
+  return { contenedor, control, error };
+}
+
+function marcarError(campo, texto) {
+  campo.control.setAttribute("aria-invalid", "true");
+  campo.error.textContent = texto;
+}
+function limpiarError(campo) {
+  campo.control.removeAttribute("aria-invalid");
+  campo.error.textContent = "";
+}
+// Valida con la API de restricciones del navegador; el primer error recibe el foco.
+function validarCampos(campos) {
+  let primero = null;
+  for (const c of campos) {
+    limpiarError(c);
+    if (!c.control.checkValidity()) {
+      marcarError(c, c.control.validationMessage || "Revisá este campo.");
+      primero = primero || c.control;
+    }
+  }
+  if (primero) primero.focus();
+  return primero === null;
+}
