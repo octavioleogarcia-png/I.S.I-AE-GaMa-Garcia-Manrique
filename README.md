@@ -1,7 +1,7 @@
 # GaMa — Sistema de Gestión de Flota y Logística
 
-**Proyecto:** GaMa · AE4 (TIFAS)
-**Cátedra:** Paradigmas y Lenguajes de Programación III · Ingeniería en Sistemas de Información · UCP · 2026
+**Proyecto:** GaMa · AE4 (TIFAS)  
+**Cátedra:** Paradigmas y Lenguajes de Programación III · Ingeniería en Sistemas de Información · UCP · 2026  
 **Docente:** Ing. Sicardi Dante
 
 GaMa es el sistema de una empresa de camiones utilitarios que traslada material de construcción. Un cliente elige las unidades que necesita, ve cuánto le va a costar con los descuentos aplicados y pide el servicio. El personal de la empresa confirma y despacha los pedidos y mantiene la flota al día, y el gerente mira las estadísticas para decidir.
