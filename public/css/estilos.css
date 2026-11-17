@@ -96,3 +96,51 @@ h1:focus { outline: none; }
 }
 
 main { padding-block: 2rem 3rem; min-height: 60vh; }
+
+/* ---------- Botones ---------- */
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  min-height: 44px; padding: .5rem 1.1rem; border-radius: var(--radio);
+  border: 2px solid var(--asfalto); font: inherit; font-weight: 700; cursor: pointer;
+  text-decoration: none; background: var(--amarillo); color: var(--asfalto);
+}
+.boton:hover { background: #ffc933; }
+.boton-oscuro { background: var(--asfalto); color: var(--claro); }
+.boton-oscuro:hover { background: var(--asfalto-2); }
+.boton-claro { background: transparent; color: var(--asfalto); }
+.boton-claro:hover { background: var(--hormigon-2); }
+.boton-peligro { background: #fff; color: var(--herrumbre); border-color: var(--herrumbre); }
+.boton-peligro:hover { background: #fbe9e1; }
+.boton[aria-disabled="true"], .boton:disabled { opacity: .6; cursor: not-allowed; }
+.boton-chico { min-height: 44px; padding: .3rem .8rem; font-size: .95rem; }
+.acciones { display: flex; flex-wrap: wrap; gap: .75rem; margin-block: 1rem; }
+
+/* ---------- Hero e inicio ---------- */
+.hero { background: var(--asfalto); color: var(--claro); padding: clamp(1.5rem, 5vw, 3rem); border-radius: var(--radio); margin-bottom: 2rem; }
+.hero p { max-width: 42rem; color: #e7e3d8; font-size: 1.15rem; }
+.hero .boton-claro { color: var(--claro); border-color: var(--claro); }
+.hero .boton-claro:hover { background: var(--asfalto-2); }
+.modulos { display: grid; gap: 1rem; grid-template-columns: 1fr; padding: 0; list-style: none; }
+.modulo { background: #fff; border: 1px solid var(--borde); border-left: 6px solid var(--amarillo); border-radius: var(--radio); padding: 1rem 1.25rem; }
+.modulo p { margin: 0; color: var(--texto-suave); }
+
+/* ---------- Formularios ---------- */
+.formulario { display: grid; gap: 1rem; }
+.campo { display: grid; gap: .3rem; }
+.campo label, .campo .etiqueta { font-weight: 700; }
+.ayuda { font-size: .9rem; color: var(--texto-suave); font-weight: 400; }
+input, select, textarea {
+  width: 100%; min-height: 44px; padding: .5rem .7rem; font: inherit; color: var(--texto);
+  background: #fff; border: 2px solid #6e675b; border-radius: var(--radio);
+}
+textarea { min-height: 6rem; resize: vertical; }
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--herrumbre); }
+.error-campo { color: var(--herrumbre); font-weight: 600; font-size: .95rem; margin: 0; }
+.panel { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 1.25rem; }
+.dos-columnas { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+
+/* ---------- Avisos (regiones aria-live) ---------- */
+.aviso { padding: .75rem 1rem; border-radius: var(--radio); border-left: 6px solid var(--acero); background: #e8f0f4; margin-block: 1rem; }
+.aviso:empty { display: none; }
+.aviso-ok { border-color: var(--verde); background: #e4f2e8; color: #123d22; }
+.aviso-error { border-color: var(--herrumbre); background: #fbe9e1; color: #5e1f06; }
