@@ -1,5 +1,5 @@
 {
- "total": 83,
+ "total": 88,
  "fallas": 0,
  "resultados": [
   {
@@ -125,7 +125,7 @@
   {
    "prueba": "login correcto → 200 con rol cliente",
    "ok": true,
-   "detalle": "{'estado': 'exito', 'mensaje': 'Autenticación exitosa.', 'csrf': 'cabab177c88fb7609193fa8c1e98275b97a1f99f9580def6eef958e5054c9f55', 'usuario': {'nombre': 'Constructora López', 'email': 'obras.lopez@g"
+   "detalle": "{'estado': 'exito', 'mensaje': 'Autenticación exitosa.', 'csrf': 'bc47d628313c33c172f6739f5eabb22f23c0205fa9dba41bda603488e188afa8', 'usuario': {'nombre': 'Constructora López', 'email': 'obras.lopez@g"
   },
   {
    "prueba": "la respuesta nunca incluye el hash",
@@ -140,7 +140,7 @@
   {
    "prueba": "logueado: sesion.php → autenticado=true con rol y CSRF",
    "ok": true,
-   "detalle": "{'estado': 'exito', 'autenticado': True, 'data': {'nombre': 'Constructora López', 'email': 'obras.lopez@gama.com', 'telefono': '376 4123456', 'rol': 'cliente'}, 'csrf': 'cabab177c88fb7609193fa8c1e9827"
+   "detalle": "{'estado': 'exito', 'autenticado': True, 'data': {'nombre': 'Constructora López', 'email': 'obras.lopez@gama.com', 'telefono': '376 4123456', 'rol': 'cliente'}, 'csrf': 'bc47d628313c33c172f6739f5eabb2"
   },
   {
    "prueba": "perfil con sesión → 200",
@@ -153,6 +153,16 @@
    "detalle": ""
   },
   {
+   "prueba": "contraseña guardada con BCRYPT costo 12 (60 caracteres)",
+   "ok": true,
+   "detalle": "$2y$12$8Sfsp"
+  },
+  {
+   "prueba": "columna password es VARCHAR(255)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
    "prueba": "registro con datos inválidos → 400",
    "ok": true,
    "detalle": ""
@@ -160,7 +170,12 @@
   {
    "prueba": "registro correcto → 201",
    "ok": true,
-   "detalle": "{'estado': 'exito', 'mensaje': 'Cuenta creada correctamente.', 'csrf': 'a3789e6e22b68403cb04be1979ec83f64ff72f9b02e91d6dd49b3db1f4940b1b', 'usuario': {'nombre': 'Marta Test', 'email': 'marta@test.com'"
+   "detalle": "{'estado': 'exito', 'mensaje': 'Cuenta creada correctamente.', 'csrf': 'd8ef2ac9c7944e322c8bf779ea73d72cc418ecb1e227c53281123ceaf4cc6852', 'usuario': {'nombre': 'Marta Test', 'email': 'marta@test.com'"
+  },
+  {
+   "prueba": "aunque mande rol=gerente, queda como cliente",
+   "ok": true,
+   "detalle": ""
   },
   {
    "prueba": "e-mail repetido → 409",
@@ -223,7 +238,7 @@
    "detalle": ""
   },
   {
-   "prueba": "texto con SQL se guarda como texto (201)",
+   "prueba": "texto con SQL se guarda como texto (201) y no rompe nada",
    "ok": true,
    "detalle": "201"
   },
@@ -416,6 +431,16 @@
    "prueba": "después de salir, perfil → 401",
    "ok": true,
    "detalle": ""
+  },
+  {
+   "prueba": "base inaccesible → 500 genérico",
+   "ok": true,
+   "detalle": "(500, '{\"estado\": \"error\", \"mensaje\": \"Error interno del servidor.\"}')"
+  },
+  {
+   "prueba": "el 500 no filtra SQLSTATE, usuario, host ni rutas",
+   "ok": true,
+   "detalle": "{\"estado\": \"error\", \"mensaje\": \"Error interno del servidor.\"}"
   }
  ]
 }
