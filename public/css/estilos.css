@@ -144,3 +144,26 @@ input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="
 .aviso:empty { display: none; }
 .aviso-ok { border-color: var(--verde); background: #e4f2e8; color: #123d22; }
 .aviso-error { border-color: var(--herrumbre); background: #fbe9e1; color: #5e1f06; }
+
+/* ---------- Catálogo ---------- */
+.filtros { display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: end; margin-bottom: 1rem; }
+.vistas { display: flex; gap: .5rem; flex-wrap: wrap; }
+.vistas .boton[aria-pressed="true"] { background: var(--asfalto); color: var(--claro); }
+.fichas { display: grid; gap: 1rem; grid-template-columns: 1fr; padding: 0; list-style: none; margin: 0; }
+.ficha { background: #fff; border: 1px solid var(--borde); border-top: 6px solid var(--amarillo); border-radius: var(--radio); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: .4rem; height: 100%; }
+.ficha h3 { margin: 0; }
+.categoria { font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-suave); margin: 0; }
+.precio { font-size: 1.4rem; font-weight: 800; margin: 0; }
+.precio small { font-size: .85rem; font-weight: 400; color: var(--texto-suave); }
+.ficha .acciones { margin-top: auto; margin-bottom: 0; }
+
+.tabla-envoltorio { overflow-x: auto; background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); }
+table { width: 100%; border-collapse: collapse; }
+caption { text-align: left; font-weight: 700; padding: .75rem 1rem; }
+th, td { padding: .6rem .9rem; text-align: left; border-top: 1px solid var(--hormigon-2); vertical-align: top; }
+thead th { background: var(--asfalto); color: var(--claro); border-top: 0; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+dl.datos { display: grid; grid-template-columns: 1fr; gap: .25rem 1rem; margin: 0 0 1rem; }
+dl.datos dt { font-weight: 700; }
+dl.datos dd { margin: 0 0 .5rem; }
